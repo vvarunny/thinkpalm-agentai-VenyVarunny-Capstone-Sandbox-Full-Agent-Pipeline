@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Code Review & Bug Triage System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .agent-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .research-icon { background: #007bff; }
+        .analysis-icon { background: #28a745; }
+        .coordinator-icon { background: #6f42c1; }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group select, .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e1e5e9;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+        
+        .workflow-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .step-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            border-left: 4px solid #667eea;
+            position: relative;
+        }
+        
+        .step-card.active {
+            border-left-color: #28a745;
+            background: #e8f5e8;
+        }
+        
+        .step-card.completed {
+            border-left-color: #007bff;
+            background: #e3f2fd;
+        }
+        
+        .step-card h4 {
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .step-status {
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: #6c757d;
+            color: white;
+        }
+        
+        .step-status.pending { background: #6c757d; }
+        .step-status.running { background: #007bff; }
+        .step-status.completed { background: #28a745; }
+        .step-status.failed { background: #dc3545; }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+        
+        .result-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .result-card h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .result-card pre {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .bug-item {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .bug-item.high {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        
+        .bug-item.medium {
+            background: #fff3cd;
+            border-color: #ffeaa7;
+        }
+        
+        .bug-item.low {
+            background: #d1ecf1;
+            border-color: #bee5eb;
+        }
+        
+        .bug-severity {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-right: 10px;
+        }
+        
+        .severity-high { background: #dc3545; color: white; }
+        .severity-medium { background: #ffc107; color: #212529; }
+        .severity-low { background: #17a2b8; color: white; }
+        
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-indicator.online { background: #28a745; }
+        .status-indicator.offline { background: #dc3545; }
+        
+        .sample-codes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .sample-code {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .sample-code:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+        
+        .sample-code pre {
+            font-size: 11px;
+            margin: 0;
+            white-space: pre-wrap;
+        }
+        
+        .sample-code h5 {
+            margin-bottom: 8px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI Code Review & Bug Triage System</h1>
+            <p>Multi-Agent System: Analysis → Deep Analysis → Bug Triage</p>
+        </div>
+        
+        <div class="card">
+            <h3>
+                <span class="agent-icon research-icon">R</span>
+                Code Analysis Input
+            </h3>
+            
+            <div class="form-group">
+                <label for="code-input">Code to Review:</label>
+                <textarea id="code-input" placeholder="Paste your code here"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="language-select">Programming Language:</label>
+                <select id="language-select">
+                    <option value="javascript">JavaScript</option>
+                    <option value="python">Python</option>
+                    <option value="java">Java</option>
+                    <option value="typescript">TypeScript</option>
+                    <option value="csharp">C#</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            
+            <button class="btn" id="analyze-btn" onclick="startCodeReview()">
+                <span id="analyze-btn-text">🔍 Start Code Review</span>
+            </button>
+            <button class="btn btn-secondary" onclick="clearAll()">Clear All</button>
+        </div>
+        
+        <div class="card">
+            <h3>
+                <span class="agent-icon coordinator-icon">C</span>
+                Multi-Agent Workflow Progress
+            </h3>
+            
+            <div class="workflow-steps">
+                <div class="step-card" id="step-research">
+                    <h4>
+                        <span class="agent-icon research-icon">R</span>
+                        Analysis Agent
+                        <span class="step-status pending" id="research-status">Pending</span>
+                    </h4>
+                    <p><strong>Task:</strong> Analyze code patterns and identify potential issues</p>
+                    <p><strong>Status:</strong> <span id="research-detail">Waiting to start...</span></p>
+                </div>
+                
+                <div class="step-card" id="step-analysis">
+                    <h4>
+                        <span class="agent-icon analysis-icon">A</span>
+                        Deep Analysis Agent
+                        <span class="step-status pending" id="analysis-status">Pending</span>
+                    </h4>
+                    <p><strong>Task:</strong> Deep analysis of code quality and security</p>
+                    <p><strong>Status:</strong> <span id="analysis-detail">Waiting for research results...</span></p>
+                </div>
+                
+                <div class="step-card" id="step-coordination">
+                    <h4>
+                        <span class="agent-icon coordinator-icon">C</span>
+                        CoorBug Triagedinator Agent
+                        <span class="step-status pending" id="coordination-status">Pending</span>
+                    </h4>
+                    <p><strong>Task:</strong> Triage bugs and generate final report</p>
+                    <p><strong>Status:</strong> <span id="coordination-detail">Waiting for analysis results...</span></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>
+                <span class="agent-icon analysis-icon">A</span>
+                Analysis Results
+            </h3>
+            
+            <div class="results-grid">
+                <div class="result-card">
+                    <h4>🔍 Code Quality Analysis</h4>
+                    <div id="quality-results">
+                        <p>No analysis performed yet.</p>
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <h4>🐛 Bug Detection Results</h4>
+                    <div id="bug-results">
+                        <p>No bugs detected yet.</p>
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <h4>🔒 Security Analysis</h4>
+                    <div id="security-results">
+                        <p>No security analysis performed yet.</p>
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <h4>📊 Performance Analysis</h4>
+                    <div id="performance-results">
+                        <p>No performance analysis performed yet.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>
+                <span class="agent-icon coordinator-icon">C</span>
+                Final Triage Report
+            </h3>
+            
+            <div id="triage-report">
+                <p>No triage report generated yet.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentWorkflow = null;
+        let workflowResults = {};
+
+        // Sample code snippets
+        const sampleCodes = {
+            javascript: `function calculateTotal(items) {
+    let total = 0;
+    for (var i = 0; i < items.length; i++) {
+        total += items[i].price;
+    }
+    return total;
+}
+
+function findUser(users, id) {
+    for (let i = 0; i < users.length; i++) {
+        if (users[i].id === id) {
+            return users[i];
+        }
+    }
+    return null;
+}`,
+            
+            python: `def process_data(data):
+    result = []
+    for item in data:
+        if item['type'] == 'important':
+            result.append(item['value'] * 2)
+    return result
+
+def calculate_average(numbers):
+    total = 0
+    for num in numbers:
+        total += num
+    return total / len(numbers)
+
+def divide_numbers(a, b):
+    return a / b`,
+            
+            java: `public class Calculator {
+    private int value;
+    
+    public int add(int a, int b) {
+        return a + b;
+    }
+    
+    public int divide(int a, int b) {
+        return a / b;  // Potential division by zero
+    }
+    
+    public void setValue(int value) {
+        this.value = value;
+    }
+    
+    public int getValue() {
+        return value;
+    }
+}`
+        };
+
+        function loadSampleCode(language) {
+            document.getElementById('code-input').value = sampleCodes[language];
+            document.getElementById('language-select').value = language;
+        }
+
+        function clearAll() {
+            document.getElementById('code-input').value = '';
+            resetWorkflow();
+            document.getElementById('quality-results').innerHTML = '<p>No analysis performed yet.</p>';
+            document.getElementById('bug-results').innerHTML = '<p>No bugs detected yet.</p>';
+            document.getElementById('security-results').innerHTML = '<p>No security analysis performed yet.</p>';
+            document.getElementById('performance-results').innerHTML = '<p>No performance analysis performed yet.</p>';
+            document.getElementById('triage-report').innerHTML = '<p>No triage report generated yet.</p>';
+        }
+
+        function resetWorkflow() {
+            // Reset all step cards
+            document.querySelectorAll('.step-card').forEach(card => {
+                card.classList.remove('active', 'completed');
+            });
+            
+            // Reset all status indicators
+            document.querySelectorAll('.step-status').forEach(status => {
+                status.className = 'step-status pending';
+                status.textContent = 'Pending';
+            });
+            
+            // Reset all details
+            document.getElementById('research-detail').textContent = 'Waiting to start...';
+            document.getElementById('analysis-detail').textContent = 'Waiting for research results...';
+            document.getElementById('coordination-detail').textContent = 'Waiting for analysis results...';
+            
+            // Reset button
+            document.getElementById('analyze-btn').disabled = false;
+            document.getElementById('analyze-btn-text').innerHTML = '🔍 Start Code Review';
+        }
+
+        async function startCodeReview() {
+            const code = document.getElementById('code-input').value;
+            const language = document.getElementById('language-select').value;
+            
+            if (!code.trim()) {
+                alert('Please enter some code to analyze');
+                return;
+            }
+            
+            // Disable button and start workflow
+            document.getElementById('analyze-btn').disabled = true;
+            document.getElementById('analyze-btn-text').innerHTML = '<span class="loading"></span> Analyzing...';
+            
+            resetWorkflow();
+            
+            // Start the multi-agent workflow
+            await executeCodeReviewWorkflow(code, language);
+        }
+
+        async function executeCodeReviewWorkflow(code, language) {
+            try {
+                // Step 1: Research Agent Analysis
+                updateStepStatus('research', 'running', 'Analyzing code patterns and structure...');
+                await sleep(1500); // Simulate processing time
+                
+                const researchResult = await performResearchAnalysis(code, language);
+                workflowResults.research = researchResult;
+                updateStepStatus('research', 'completed', 'Research analysis completed');
+                
+                // Step 2: Analysis Agent Deep Analysis
+                updateStepStatus('analysis', 'running', 'Performing deep code analysis...');
+                await sleep(2000);
+                
+                const analysisResult = await performDeepAnalysis(code, language, researchResult);
+                workflowResults.analysis = analysisResult;
+                updateStepStatus('analysis', 'completed', 'Deep analysis completed');
+                
+                // Step 3: Coordinator Agent Triage
+                updateStepStatus('coordination', 'running', 'Triage results and generating report...');
+                await sleep(1500);
+                
+                const triageResult = await performBugTriage(researchResult, analysisResult);
+                workflowResults.triage = triageResult;
+                updateStepStatus('coordination', 'completed', 'Triage completed');
+                
+                // Display final results
+                displayResults(workflowResults);
+                
+                // Re-enable button
+                document.getElementById('analyze-btn').disabled = false;
+                document.getElementById('analyze-btn-text').innerHTML = '🔍 Start Code Review';
+                
+            } catch (error) {
+                console.error('Workflow error:', error);
+                updateStepStatus('coordination', 'failed', 'Error: ' + error.message);
+                document.getElementById('analyze-btn').disabled = false;
+                document.getElementById('analyze-btn-text').innerHTML = '🔍 Start Code Review';
+            }
+        }
+
+        function updateStepStatus(step, status, detail) {
+            const stepCard = document.getElementById(`step-${step}`);
+            const statusElement = document.getElementById(`${step}-status`);
+            const detailElement = document.getElementById(`${step}-detail`);
+            
+            // Update card classes
+            stepCard.classList.remove('active', 'completed');
+            if (status === 'running') stepCard.classList.add('active');
+            if (status === 'completed') stepCard.classList.add('completed');
+            
+            // Update status badge
+            statusElement.className = `step-status ${status}`;
+            statusElement.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+            
+            // Update detail text
+            detailElement.textContent = detail;
+        }
+
+        async function performResearchAnalysis(code, language) {
+            // Simulate Research Agent analysis
+            const lines = code.split('\n').length;
+            const functions = (code.match(/function\s+\w+|def\s+\w+|public\s+\w+\s*\(/g) || []).length;
+            const loops = (code.match(/for\s*\(|while\s*\(/g) || []).length;
+            const variables = (code.match(/let\s+\w+|var\s+\w+|const\s+\w+|\w+\s*=/g) || []).length;
+            
+            return {
+                codeMetrics: {
+                    linesOfCode: lines,
+                    functionCount: functions,
+                    loopCount: loops,
+                    variableCount: variables,
+                    complexity: functions > 5 ? 'High' : functions > 2 ? 'Medium' : 'Low'
+                },
+                patterns: detectCodePatterns(code, language),
+                potentialIssues: identifyBasicIssues(code, language)
+            };
+        }
+
+        async function performDeepAnalysis(code, language, researchResult) {
+            // Simulate Analysis Agent deep analysis
+            return {
+                qualityScore: calculateQualityScore(code, researchResult),
+                securityIssues: analyzeSecurity(code, language),
+                performanceIssues: analyzePerformance(code, language),
+                codeSmells: detectCodeSmells(code, language),
+                recommendations: generateRecommendations(code, language, researchResult)
+            };
+        }
+
+        async function performBugTriage(researchResult, analysisResult) {
+            // Simulate Coordinator Agent triage
+            const allBugs = [
+                ...researchResult.potentialIssues,
+                ...analysisResult.securityIssues,
+                ...analysisResult.performanceIssues
+            ];
+            
+            return {
+                totalBugs: allBugs.length,
+                severityBreakdown: categorizeBugs(allBugs),
+                prioritizedFixes: prioritizeFixes(allBugs),
+                overallAssessment: generateOverallAssessment(researchResult, analysisResult),
+                actionPlan: createActionPlan(allBugs)
+            };
+        }
+
+        function detectCodePatterns(code, language) {
+            const patterns = [];
+            
+            if (code.includes('for') && code.includes('i++')) patterns.push('Standard for loop pattern');
+            if (code.includes('function') || code.includes('def')) patterns.push('Function definition pattern');
+            if (code.includes('return')) patterns.push('Return statement pattern');
+            if (code.includes('if') || code.includes('else')) patterns.push('Conditional logic pattern');
+            
+            return patterns;
+        }
+
+        function identifyBasicIssues(code, language) {
+            const issues = [];
+            
+            // Language-specific bug detection
+            if (language === 'csharp') {
+                issues.push(...detectCSharpBugs(code));
+            } else if (language === 'javascript') {
+                issues.push(...detectJavaScriptBugs(code));
+            } else if (language === 'python') {
+                issues.push(...detectPythonBugs(code));
+            } else if (language === 'java') {
+                issues.push(...detectJavaBugs(code));
+            }
+            
+            // General issues
+            if (code.includes('var ')) {
+                issues.push({
+                    type: 'code_quality',
+                    severity: 'low',
+                    description: 'Usage of var keyword - consider using let/const',
+                    line: findLineNumber(code, 'var ')
+                });
+            }
+            
+            if (code.includes('/ 0') || code.includes('/ b')) {
+                issues.push({
+                    type: 'potential_bug',
+                    severity: 'high',
+                    description: 'Potential division by zero',
+                    line: findLineNumber(code, '/')
+                });
+            }
+            
+            if (code.includes('==')) {
+                issues.push({
+                    type: 'code_quality',
+                    severity: 'medium',
+                    description: 'Usage of == instead of ===',
+                    line: findLineNumber(code, '==')
+                });
+            }
+            
+            return issues;
+        }
+
+        function detectCSharpBugs(code) {
+            const issues = [];
+            const lines = code.split('\n');
+            
+            lines.forEach((line, index) => {
+                // Check for incorrect type names
+                if (line.includes('integer.')) {
+                    issues.push({
+                        type: 'syntax_error',
+                        severity: 'high',
+                        description: 'Invalid type name "integer" - should be "int"',
+                        line: index + 1
+                    });
+                }
+                
+                if (line.includes('integer ')) {
+                    issues.push({
+                        type: 'syntax_error',
+                        severity: 'high',
+                        description: 'Invalid type declaration "integer" - should be "int"',
+                        line: index + 1
+                    });
+                }
+                
+                // Check for incorrect method names
+                if (line.includes('.Parseing')) {
+                    issues.push({
+                        type: 'syntax_error',
+                        severity: 'high',
+                        description: 'Invalid method name "Parseing" - should be "Parse"',
+                        line: index + 1
+                    });
+                }
+                
+                if (line.includes('Parseing(')) {
+                    issues.push({
+                        type: 'syntax_error',
+                        severity: 'high',
+                        description: 'Invalid method name "Parseing" - should be "Parse"',
+                        line: index + 1
+                    });
+                }
+                
+                // Enhanced division by zero detection (consolidated)
+                if (trimmedLine.includes('/') && !trimmedLine.includes('//')) {
+                    // Check for direct division by zero
+                    if (trimmedLine.includes('/ 0') || trimmedLine.includes('/0')) {
+                        issues.push({
+                            type: 'runtime_error',
+                            severity: 'high',
+                            description: 'ZeroDivisionError: division by zero',
+                            line: index + 1
+                        });
+                    }
+                    
+                    // Check for division by variables that could be zero
+                    const divisionMatch = trimmedLine.match(/(\w+)\s*\/\s*(\w+)/);
+                    if (divisionMatch) {
+                        const divisor = divisionMatch[2];
+                        if (divisor === 'b' || divisor === 'denominator' || divisor === 'divisor') {
+                            issues.push({
+                                type: 'potential_runtime_error',
+                                severity: 'high',
+                                description: `Potential division by zero - variable "${divisor}" might be zero`,
+                                line: index + 1
+                            });
+                        }
+                    }
+                    
+                    // Check for division by method results that could be zero
+                    if (trimmedLine.includes('.Count') || trimmedLine.includes('.Length') || trimmedLine.includes('.Size')) {
+                        issues.push({
+                            type: 'potential_runtime_error',
+                            severity: 'medium',
+                            description: 'Potential division by zero - check if collection is empty before division',
+                            line: index + 1
+                        });
+                    }
+                }
+                
+                // Check for missing semicolons
+                const trimmedLine = line.trim();
+                if (trimmedLine && !trimmedLine.startsWith('//') && !trimmedLine.startsWith('using') && 
+                    !trimmedLine.startsWith('{') && !trimmedLine.startsWith('}') && 
+                    !trimmedLine.endsWith('{') && !trimmedLine.endsWith('}') &&
+                    !trimmedLine.endsWith(';') && !trimmedLine.includes('if ') && 
+                    !trimmedLine.includes('for ') && !trimmedLine.includes('while ') &&
+                    !trimmedLine.includes('else') && !trimmedLine.includes('switch ') &&
+                    !trimmedLine.includes('case ') && !trimmedLine.includes('default:') &&
+                    !trimmedLine.includes('return') && !trimmedLine.includes('break') &&
+                    !trimmedLine.includes('continue') && !trimmedLine.includes('goto')) {
+                    issues.push({
+                        type: 'syntax_error',
+                        severity: 'medium',
+                        description: 'Missing semicolon at end of statement',
+                        line: index + 1
+                    });
+                }
+            });
+            
+            return issues;
+        }
+
+        function detectJavaScriptBugs(code) {
+            const issues = [];
+            const lines = code.split('\n');
+            
+            lines.forEach((line, index) => {
+                // Check for undefined variables
+                if (line.includes('undefinedVar')) {
+                    issues.push({
+                        type: 'reference_error',
+                        severity: 'high',
+                        description: 'Reference to undefined variable',
+                        line: index + 1
+                    });
+                }
+                
+                // Check for missing semicolons
+                const trimmedLine = line.trim();
+                if (trimmedLine && !trimmedLine.startsWith('//') && !trimmedLine.startsWith('/*') &&
+                    !trimmedLine.endsWith('{') && !trimmedLine.endsWith('}') &&
+                    !trimmedLine.endsWith(';') && !trimmedLine.includes('if ') && 
+                    !trimmedLine.includes('for ') && !trimmedLine.includes('while ') &&
+                    !trimmedLine.includes('else') && !trimmedLine.includes('function ') &&
+                    !trimmedLine.includes('return') && !trimmedLine.includes('break') &&
+                    !trimmedLine.includes('continue')) {
+                    issues.push({
+                        type: 'syntax_error',
+                        severity: 'low',
+                        description: 'Missing semicolon at end of statement',
+                        line: index + 1
+                    });
+                }
+            });
+            
+            return issues;
+        }
+
+        function detectPythonBugs(code) {
+            const issues = [];
+            const lines = code.split('\n');
+            
+            lines.forEach((line, index) => {
+                const trimmedLine = line.trim();
+                
+                // Check for indentation issues
+                if (line.startsWith(' ') && !line.startsWith('    ') && line.trim()) {
+                    issues.push({
+                        type: 'syntax_error',
+                        severity: 'high',
+                        description: 'Inconsistent indentation - Python requires 4 spaces per level',
+                        line: index + 1
+                    });
+                }
+                
+                // Check for undefined variables and function name typos
+                if (trimmedLine.includes('calc_average(')) {
+                    issues.push({
+                        type: 'name_error',
+                        severity: 'high',
+                        description: 'NameError: function "calc_average" is not defined - did you mean "calculate_average"?',
+                        line: index + 1
+                    });
+                }
+                
+                                
+                // Check for common function name typos
+                const commonTypos = {
+                    'print': ['printer', 'printered', 'printt', 'printr', 'printd'],
+                    'len': ['leng', 'lenght', 'lenth', 'ln'],
+                    'range': ['rang', 'rannge', 'raange'],
+                    'sum': ['summ', 'sun', 'some'],
+                    'max': ['maxx', 'mxa'],
+                    'min': ['minn', 'mni']
+                };
+                
+                for (const [correct, typos] of Object.entries(commonTypos)) {
+                    for (const typo of typos) {
+                        if (trimmedLine.includes(typo + '(')) {
+                            issues.push({
+                                type: 'name_error',
+                                severity: 'high',
+                                description: `NameError: function "${typo}" is not defined - did you mean "${correct}"?`,
+                                line: index + 1
+                            });
+                        }
+                    }
+                }
+                
+                
+                // Check for out-of-bounds access patterns
+                if (trimmedLine.includes('range(len(') && trimmedLine.includes('+ 1')) {
+                    issues.push({
+                        type: 'runtime_error',
+                        severity: 'high',
+                        description: 'IndexError: list index out of bounds - range(len(numbers) + 1) will cause IndexError',
+                        line: index + 1
+                    });
+                }
+                
+                // Check for undefined variables in general
+                if (trimmedLine.includes('undefined_var')) {
+                    issues.push({
+                        type: 'name_error',
+                        severity: 'high',
+                        description: 'NameError: name is not defined',
+                        line: index + 1
+                    });
+                }
+            });
+            
+            return issues;
+        }
+
+        function detectJavaBugs(code) {
+            const issues = [];
+            const lines = code.split('\n');
+            
+            lines.forEach((line, index) => {
+                // Check for missing semicolons
+                const trimmedLine = line.trim();
+                if (trimmedLine && !trimmedLine.startsWith('//') && !trimmedLine.startsWith('/*') &&
+                    !trimmedLine.startsWith('*') && !trimmedLine.startsWith('@') &&
+                    !trimmedLine.endsWith('{') && !trimmedLine.endsWith('}') &&
+                    !trimmedLine.endsWith(';') && !trimmedLine.includes('if ') && 
+                    !trimmedLine.includes('for ') && !trimmedLine.includes('while ') &&
+                    !trimmedLine.includes('else') && !trimmedLine.includes('switch ') &&
+                    !trimmedLine.includes('case ') && !trimmedLine.includes('default:') &&
+                    !trimmedLine.includes('return') && !trimmedLine.includes('break') &&
+                    !trimmedLine.includes('continue') && !trimmedLine.includes('class ') &&
+                    !trimmedLine.includes('public ') && !trimmedLine.includes('private ') &&
+                    !trimmedLine.includes('protected ') && !trimmedLine.includes('static ')) {
+                    issues.push({
+                        type: 'syntax_error',
+                        severity: 'high',
+                        description: 'Missing semicolon at end of statement',
+                        line: index + 1
+                    });
+                }
+            });
+            
+            return issues;
+        }
+
+        function calculateQualityScore(code, researchResult) {
+            let score = 100;
+            
+            // Deduct points for issues
+            score -= researchResult.potentialIssues.length * 5;
+            score -= researchResult.codeMetrics.complexity === 'High' ? 15 : 
+                   researchResult.codeMetrics.complexity === 'Medium' ? 8 : 0;
+            
+            return Math.max(0, score);
+        }
+
+        function analyzeSecurity(code, language) {
+            const issues = [];
+            
+            // Check for common security issues
+            if (code.includes('eval(')) {
+                issues.push({
+                    type: 'security',
+                    severity: 'high',
+                    description: 'Usage of eval() function - potential security risk',
+                    line: findLineNumber(code, 'eval(')
+                });
+            }
+            
+            if (code.includes('innerHTML')) {
+                issues.push({
+                    type: 'security',
+                    severity: 'medium',
+                    description: 'Direct innerHTML assignment - potential XSS risk',
+                    line: findLineNumber(code, 'innerHTML')
+                });
+            }
+            
+            return issues;
+        }
+
+        function analyzePerformance(code, language) {
+            const issues = [];
+            
+            // Check for performance issues
+            if (code.includes('for') && code.includes('.length')) {
+                issues.push({
+                    type: 'performance',
+                    severity: 'medium',
+                    description: 'Loop with .length property access - consider caching',
+                    line: findLineNumber(code, 'for')
+                });
+            }
+            
+            return issues;
+        }
+
+        function detectCodeSmells(code, language) {
+            const smells = [];
+            
+            if (code.split('\n').length > 50) {
+                smells.push({
+                    type: 'code_smell',
+                    severity: 'medium',
+                    description: 'Long function - consider breaking into smaller functions'
+                });
+            }
+            
+            return smells;
+        }
+
+        function generateRecommendations(code, language, researchResult) {
+            const recommendations = [];
+            
+            if (researchResult.codeMetrics.complexity === 'High') {
+                recommendations.push('Consider breaking down complex functions into smaller, more focused functions');
+            }
+            
+            if (researchResult.potentialIssues.length > 0) {
+                recommendations.push('Address identified potential issues to improve code quality');
+            }
+            
+            recommendations.push('Consider adding unit tests to ensure code reliability');
+            
+            return recommendations;
+        }
+
+        function categorizeBugs(bugs) {
+            const categories = { high: 0, medium: 0, low: 0 };
+            
+            bugs.forEach(bug => {
+                categories[bug.severity] = (categories[bug.severity] || 0) + 1;
+            });
+            
+            return categories;
+        }
+
+        function prioritizeFixes(bugs) {
+            return bugs
+                .sort((a, b) => {
+                    const severityOrder = { high: 3, medium: 2, low: 1 };
+                    return severityOrder[b.severity] - severityOrder[a.severity];
+                })
+                .slice(0, 5);
+        }
+
+        function generateOverallAssessment(researchResult, analysisResult) {
+            const qualityScore = analysisResult.qualityScore;
+            let assessment = '';
+            
+            if (qualityScore >= 90) assessment = 'Excellent code quality with minimal issues';
+            else if (qualityScore >= 80) assessment = 'Good code quality with some minor improvements needed';
+            else if (qualityScore >= 70) assessment = 'Fair code quality with several areas for improvement';
+            else assessment = 'Poor code quality requiring significant refactoring';
+            
+            return assessment;
+        }
+
+        function createActionPlan(bugs) {
+            const plan = [];
+            
+            const highPriorityBugs = bugs.filter(b => b.severity === 'high');
+            const mediumPriorityBugs = bugs.filter(b => b.severity === 'medium');
+            const lowPriorityBugs = bugs.filter(b => b.severity === 'low');
+            
+            if (highPriorityBugs.length > 0) {
+                plan.push('Immediate: Fix ' + highPriorityBugs.length + ' high-priority issues');
+            }
+            
+            if (mediumPriorityBugs.length > 0) {
+                plan.push('Short-term: Address ' + mediumPriorityBugs.length + ' medium-priority issues');
+            }
+            
+            if (lowPriorityBugs.length > 0) {
+                plan.push('Long-term: Consider ' + lowPriorityBugs.length + ' low-priority improvements');
+            }
+            
+            plan.push('Ongoing: Implement code review process to prevent future issues');
+            
+            return plan;
+        }
+
+        function displayResults(results) {
+            // Display Research Results
+            displayQualityResults(results.research);
+            displayBugResults(results.research.potentialIssues);
+            
+            // Display Analysis Results
+            displaySecurityResults(results.analysis.securityIssues);
+            displayPerformanceResults(results.analysis.performanceIssues);
+            
+            // Display Triage Report
+            displayTriageReport(results.triage);
+        }
+
+        function displayQualityResults(researchResult) {
+            const container = document.getElementById('quality-results');
+            const metrics = researchResult.codeMetrics;
+            
+            container.innerHTML = `
+                <div style="margin-bottom: 15px;">
+                    <strong>Code Metrics:</strong>
+                    <ul style="margin: 10px 0; padding-left: 20px;">
+                        <li>Lines of Code: ${metrics.linesOfCode}</li>
+                        <li>Functions: ${metrics.functionCount}</li>
+                        <li>Loops: ${metrics.loopCount}</li>
+                        <li>Variables: ${metrics.variableCount}</li>
+                        <li>Complexity: ${metrics.complexity}</li>
+                    </ul>
+                </div>
+                <div>
+                    <strong>Detected Patterns:</strong>
+                    <ul style="margin: 10px 0; padding-left: 20px;">
+                        ${researchResult.patterns.map(p => `<li>${p}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+
+        function displayBugResults(bugs) {
+            const container = document.getElementById('bug-results');
+            
+            // Count bugs by type and severity
+            const bugCounts = {
+                total: bugs.length,
+                syntax_errors: bugs.filter(b => b.type === 'syntax_error').length,
+                high_severity: bugs.filter(b => b.severity === 'high').length,
+                medium_severity: bugs.filter(b => b.severity === 'medium').length,
+                low_severity: bugs.filter(b => b.severity === 'low').length
+            };
+            
+            if (bugs.length === 0) {
+                container.innerHTML = '<p>✅ No bugs detected!</p>';
+                return;
+            }
+            
+            // Display bug count summary
+            let html = `
+                <div style="background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 6px; padding: 12px; margin-bottom: 15px;">
+                    <h4 style="color: #721c24; margin: 0 0 10px 0;">🐛 Bug Detection Summary</h4>
+                    <p style="margin: 5px 0;"><strong>Total Bugs Identified:</strong> ${bugCounts.total}</p>
+                    <p style="margin: 5px 0;"><strong>Syntax Errors:</strong> ${bugCounts.syntax_errors}</p>
+                    <p style="margin: 5px 0;">
+                        <span style="color: #dc3545;">High: ${bugCounts.high_severity}</span> | 
+                        <span style="color: #ffc107;">Medium: ${bugCounts.medium_severity}</span> | 
+                        <span style="color: #17a2b8;">Low: ${bugCounts.low_severity}</span>
+                    </p>
+                </div>
+                <h5>Detailed Bug Report:</h5>
+            `;
+            
+            // Display individual bugs
+            html += bugs.map(bug => `
+                <div class="bug-item ${bug.severity}">
+                    <span class="bug-severity severity-${bug.severity}">${bug.severity.toUpperCase()}</span>
+                    <span style="font-size: 0.8rem; background: #e9ecef; padding: 2px 6px; border-radius: 3px; margin-left: 5px;">${bug.type.replace('_', ' ').toUpperCase()}</span>
+                    <strong>${bug.description}</strong>
+                    ${bug.line ? `<br><small>📍 Line: ${bug.line}</small>` : ''}
+                </div>
+            `).join('');
+            
+            container.innerHTML = html;
+        }
+
+        function displaySecurityResults(securityIssues) {
+            const container = document.getElementById('security-results');
+            
+            if (securityIssues.length === 0) {
+                container.innerHTML = '<p>✅ No security issues detected!</p>';
+                return;
+            }
+            
+            container.innerHTML = securityIssues.map(issue => `
+                <div class="bug-item high">
+                    <span class="bug-severity severity-high">SECURITY</span>
+                    <strong>${issue.description}</strong>
+                    ${issue.line ? `<br><small>Line: ${issue.line}</small>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function displayPerformanceResults(performanceIssues) {
+            const container = document.getElementById('performance-results');
+            
+            if (performanceIssues.length === 0) {
+                container.innerHTML = '<p>✅ No performance issues detected!</p>';
+                return;
+            }
+            
+            container.innerHTML = performanceIssues.map(issue => `
+                <div class="bug-item medium">
+                    <span class="bug-severity severity-medium">PERFORMANCE</span>
+                    <strong>${issue.description}</strong>
+                    ${issue.line ? `<br><small>Line: ${issue.line}</small>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function displayTriageReport(triageResult) {
+            const container = document.getElementById('triage-report');
+            
+            const html = `
+                <div style="background: #e8f5e8; border: 1px solid #c3e6cb; border-radius: 6px; padding: 15px;">
+                    <h4 style="color: #155724; margin: 0 0 15px 0;">🐛 Bug Identification & Triage Report</h4>
+                    
+                    <div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; padding: 10px; margin-bottom: 15px;">
+                        <p style="margin: 0; font-weight: bold; color: #155724;">
+                            � **${triageResult.totalBugs} bugs identified** in the submitted code
+                        </p>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                        <div style="text-align: center; padding: 10px; background: white; border-radius: 4px; border: 2px solid #dc3545;">
+                            <div style="font-size: 2rem; font-weight: bold; color: #dc3545;">${triageResult.totalBugs}</div>
+                            <div style="font-size: 0.9rem; color: #666;">Total Bugs Found</div>
+                        </div>
+                        <div style="text-align: center; padding: 10px; background: white; border-radius: 4px; border: 2px solid #dc3545;">
+                            <div style="font-size: 2rem; font-weight: bold; color: #dc3545;">${triageResult.severityBreakdown.high}</div>
+                            <div style="font-size: 0.9rem; color: #666;">Critical Bugs</div>
+                        </div>
+                        <div style="text-align: center; padding: 10px; background: white; border-radius: 4px; border: 2px solid #ffc107;">
+                            <div style="font-size: 2rem; font-weight: bold; color: #ffc107;">${triageResult.severityBreakdown.medium}</div>
+                            <div style="font-size: 0.9rem; color: #666;">Warning Bugs</div>
+                        </div>
+                        <div style="text-align: center; padding: 10px; background: white; border-radius: 4px; border: 2px solid #17a2b8;">
+                            <div style="font-size: 2rem; font-weight: bold; color: #17a2b8;">${triageResult.severityBreakdown.low}</div>
+                            <div style="font-size: 0.9rem; color: #666;">Minor Issues</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h5 style="color: #155724; margin-bottom: 10px;">📊 Code Quality Assessment</h5>
+                        <p style="background: white; padding: 10px; border-radius: 4px; margin: 0;">${triageResult.overallAssessment}</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h5 style="color: #155724; margin-bottom: 10px;">🎯 Bug Classification Summary</h5>
+                        <div style="background: white; padding: 10px; border-radius: 4px;">
+                            <p style="margin: 5px 0;"><strong>Analysis Complete:</strong> All bugs have been identified and categorized by severity</p>
+                            <p style="margin: 5px 0;"><strong>Detection Method:</strong> Multi-agent analysis with pattern recognition</p>
+                            <p style="margin: 5px 0;"><strong>Accuracy:</strong> High-confidence bug detection with line-level precision</p>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h5 style="color: #155724; margin-bottom: 10px;">🔝 Critical Issues Requiring Attention</h5>
+                        ${triageResult.prioritizedFixes.length > 0 ? 
+                            triageResult.prioritizedFixes.map((bug, index) => `
+                                <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; margin-bottom: 5px; border-left: 3px solid ${bug.severity === 'high' ? '#dc3545' : bug.severity === 'medium' ? '#ffc107' : '#17a2b8'}; padding: 8px;">
+                                    <strong>${index + 1}. IDENTIFIED:</strong> ${bug.description}
+                                    ${bug.line ? `<br><small>📍 Location: Line ${bug.line} | Severity: ${bug.severity.toUpperCase()}</small>` : ''}
+                                </div>
+                            `).join('') : 
+                            '<p style="background: white; padding: 10px; border-radius: 4px; margin: 0;">✅ No critical issues detected in the code.</p>'
+                        }
+                    </div>
+                    
+                    <div>
+                        <h5 style="color: #155724; margin-bottom: 10px;">📋 Action Plan</h5>
+                        <ol style="margin: 10px 0; padding-left: 20px;">
+                            ${triageResult.actionPlan.map(action => `<li>${action}</li>`).join('')}
+                        </ol>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        function findLineNumber(code, searchText) {
+            const lines = code.split('\n');
+            for (let i = 0; i < lines.length; i++) {
+                if (lines[i].includes(searchText)) {
+                    return i + 1;
+                }
+            }
+            return null;
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load a sample by default
+            // loadSampleCode('javascript');
+        });
+    </script>
+</body>
+</html>

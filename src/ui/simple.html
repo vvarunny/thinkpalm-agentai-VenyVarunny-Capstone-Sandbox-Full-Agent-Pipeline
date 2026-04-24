@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic Pipeline - Simple Interface</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group select, .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e1e5e9;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            margin-right: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .logs {
+            max-height: 400px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 15px;
+        }
+        
+        .log-entry {
+            background: white;
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-left: 3px solid #667eea;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+        }
+        
+        .log-entry.error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        
+        .log-entry.success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        
+        .status {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .task-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .task-item h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .task-item p {
+            color: #666;
+            margin: 5px 0;
+        }
+        
+        .status-running { color: #007bff; }
+        .status-completed { color: #28a745; }
+        .status-failed { color: #dc3545; }
+        .status-submitted { color: #6c757d; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Agentic Pipeline - Simple Interface</h1>
+            <p>Multi-Agent System with Real-time Monitoring</p>
+        </div>
+        
+        <div class="card">
+            <h3>System Status</h3>
+            <div class="status" id="system-status">
+                <div class="status-item">
+                    <span>Connection:</span>
+                    <span id="connection-status">Connecting...</span>
+                </div>
+                <div class="status-item">
+                    <span>Total Tasks:</span>
+                    <span id="total-tasks">0</span>
+                </div>
+                <div class="status-item">
+                    <span>Completed Tasks:</span>
+                    <span id="completed-tasks">0</span>
+                </div>
+                <div class="status-item">
+                    <span>Failed Tasks:</span>
+                    <span id="failed-tasks">0</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>Submit Task</h3>
+            <div class="form-group">
+                <label for="agent-select">Target Agent:</label>
+                <select id="agent-select">
+                    <option value="research-001">Research Agent</option>
+                    <option value="analysis-001">Analysis Agent</option>
+                    <option value="coordinator-001">Coordinator Agent</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="task-type">Task Type:</label>
+                <select id="task-type">
+                    <option value="research">Research Task</option>
+                    <option value="analysis">Analysis Task</option>
+                    <option value="workflow">Workflow Task</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="task-query">Query/Parameters:</label>
+                <textarea id="task-query" rows="3" placeholder="Enter your query or task parameters..."></textarea>
+            </div>
+            <button class="btn" onclick="submitTask()">Submit Task</button>
+            <button class="btn" onclick="testWebSocket()">Test WebSocket</button>
+        </div>
+        
+        <div class="card">
+            <h3>Execute Workflow</h3>
+            <div class="form-group">
+                <label for="workflow-type">Workflow Type:</label>
+                <select id="workflow-type">
+                    <option value="research_analysis">Research & Analysis</option>
+                    <option value="data_pipeline">Data Pipeline</option>
+                    <option value="multi_agent_coordination">Multi-Agent Coordination</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="workflow-input">Input Data:</label>
+                <textarea id="workflow-input" rows="3" placeholder="Enter workflow input data..."></textarea>
+            </div>
+            <button class="btn" onclick="executeWorkflow()">Execute Workflow</button>
+        </div>
+        
+        <div class="card">
+            <h3>Active Tasks</h3>
+            <div id="tasks-container">
+                <p>No tasks submitted yet.</p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>System Logs</h3>
+            <div class="logs" id="logs-container">
+                <div class="log-entry">[System] Waiting for connection...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let socket = null;
+        let tasks = {};
+        let metrics = {
+            total: 0,
+            completed: 0,
+            failed: 0
+        };
+
+        // Initialize socket connection
+        function initSocket() {
+            console.log('Initializing socket...');
+            socket = io();
+            
+            socket.on('connect', () => {
+                console.log('Connected to server');
+                updateConnectionStatus('Connected');
+                addLog('Connected to server - ready to receive events', 'success');
+                
+                // Request initial status
+                socket.emit('get_status');
+            });
+
+            socket.on('disconnect', () => {
+                console.log('Disconnected from server');
+                updateConnectionStatus('Disconnected');
+                addLog('Disconnected from server', 'error');
+            });
+
+            socket.on('status', (status) => {
+                console.log('Status received:', status);
+                updateSystemStatus(status);
+            });
+
+            socket.on('task_submitted', (task) => {
+                console.log('🎉 Task submitted event received:', task);
+                addLog(`🎉 Task submitted: ${task.task_id}`, 'info');
+                updateTaskStatus(task.task_id, 'submitted');
+                metrics.total++;
+                updateMetrics();
+            });
+
+            socket.on('task_started', (task) => {
+                console.log('Task started:', task);
+                addLog(`Task started: ${task.task.id}`, 'info');
+                updateTaskStatus(task.task.id, 'running');
+            });
+
+            socket.on('task_completed', (task) => {
+                console.log('🎉 Task completed event received:', task);
+                addLog(`🎉 Task completed: ${task.task.id}`, 'success');
+                updateTaskStatus(task.task.id, 'completed');
+                metrics.completed++;
+                updateMetrics();
+                displayTaskResult(task);
+            });
+
+            socket.on('task_failed', (task) => {
+                console.log('Task failed:', task);
+                addLog(`Task failed: ${task.task.id} - ${task.error}`, 'error');
+                updateTaskStatus(task.task.id, 'failed');
+                metrics.failed++;
+                updateMetrics();
+            });
+
+            socket.on('workflow_completed', (workflow) => {
+                console.log('Workflow completed:', workflow);
+                addLog(`Workflow completed: ${workflow.id}`, 'success');
+                displayWorkflowResult(workflow);
+            });
+
+            socket.on('error', (error) => {
+                console.log('Socket error:', error);
+                addLog(`Error: ${error.message}`, 'error');
+            });
+
+            socket.on('connect_error', (error) => {
+                console.log('Connection error:', error);
+                updateConnectionStatus('Connection Error');
+                addLog(`Connection error: ${error.message}`, 'error');
+            });
+        }
+
+        function updateConnectionStatus(status) {
+            const element = document.getElementById('connection-status');
+            element.textContent = status;
+            element.className = status === 'Connected' ? 'status-completed' : 'status-failed';
+        }
+
+        function updateSystemStatus(status) {
+            if (status.metrics) {
+                metrics.total = status.metrics.total_tasks || 0;
+                metrics.completed = status.metrics.completed_tasks || 0;
+                metrics.failed = status.metrics.failed_tasks || 0;
+                updateMetrics();
+            }
+        }
+
+        function updateMetrics() {
+            document.getElementById('total-tasks').textContent = metrics.total;
+            document.getElementById('completed-tasks').textContent = metrics.completed;
+            document.getElementById('failed-tasks').textContent = metrics.failed;
+        }
+
+        function updateTaskStatus(taskId, status) {
+            tasks[taskId] = {
+                id: taskId,
+                status: status,
+                timestamp: new Date().toLocaleTimeString()
+            };
+            renderTasks();
+        }
+
+        function renderTasks() {
+            const container = document.getElementById('tasks-container');
+            
+            if (Object.keys(tasks).length === 0) {
+                container.innerHTML = '<p>No tasks submitted yet.</p>';
+                return;
+            }
+
+            let html = '';
+            for (const [taskId, task] of Object.entries(tasks)) {
+                html += `
+                    <div class="task-item">
+                        <h4>Task ${taskId}</h4>
+                        <p><strong>Status:</strong> <span class="status-${task.status}">${task.status}</span></p>
+                        <p><strong>Updated:</strong> ${task.timestamp}</p>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        function addLog(message, type = 'info') {
+            const logsContainer = document.getElementById('logs-container');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            
+            logsContainer.appendChild(logEntry);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+            
+            // Keep only last 50 logs
+            while (logsContainer.children.length > 50) {
+                logsContainer.removeChild(logsContainer.firstChild);
+            }
+        }
+
+        function testWebSocket() {
+            console.log('Testing WebSocket connection...');
+            addLog('🧪 Testing WebSocket connection...', 'info');
+            
+            if (socket && socket.connected) {
+                addLog('✅ WebSocket is connected', 'success');
+                // Send a test ping
+                socket.emit('get_status');
+                addLog('📡 Sent status request to server', 'info');
+            } else {
+                addLog('❌ WebSocket is not connected', 'error');
+            }
+        }
+
+        function submitTask() {
+            const agentId = document.getElementById('agent-select').value;
+            const taskType = document.getElementById('task-type').value;
+            const query = document.getElementById('task-query').value;
+
+            if (!query.trim()) {
+                addLog('Please enter a query or parameters', 'error');
+                return;
+            }
+
+            const task = {
+                type: taskType,
+                agent_id: agentId,
+                parameters: {
+                    query: query,
+                    analysis_type: 'summary'
+                }
+            };
+
+            if (socket && socket.connected) {
+                socket.emit('submit_task', { task, priority: 'normal' });
+                addLog(`Task submitted: ${taskType} - ${query}`, 'info');
+                document.getElementById('task-query').value = '';
+            } else {
+                addLog('Not connected to server', 'error');
+            }
+        }
+
+        function executeWorkflow() {
+            const workflowType = document.getElementById('workflow-type').value;
+            const input = document.getElementById('workflow-input').value;
+
+            if (!input.trim()) {
+                addLog('Please enter workflow input data', 'error');
+                return;
+            }
+
+            const workflow = getWorkflowDefinition(workflowType, input);
+            
+            if (socket && socket.connected) {
+                socket.emit('execute_workflow', { 
+                    workflow, 
+                    context: { input } 
+                });
+                addLog(`Workflow executed: ${workflowType}`, 'info');
+                document.getElementById('workflow-input').value = '';
+            } else {
+                addLog('Not connected to server', 'error');
+            }
+        }
+
+        function getWorkflowDefinition(type, input) {
+            switch (type) {
+                case 'research_analysis':
+                    return {
+                        type: 'research_analysis',
+                        steps: [
+                            {
+                                name: 'research',
+                                type: 'agent_task',
+                                agent_id: 'research-001',
+                                task_type: 'research',
+                                parameters: { query: input }
+                            },
+                            {
+                                name: 'analysis',
+                                type: 'agent_task',
+                                agent_id: 'analysis-001',
+                                task_type: 'analysis',
+                                parameters: { data: 'research_result' }
+                            }
+                        ]
+                    };
+                
+                case 'data_pipeline':
+                    return {
+                        type: 'data_pipeline',
+                        steps: [
+                            {
+                                name: 'collection',
+                                type: 'agent_task',
+                                agent_id: 'research-001',
+                                task_type: 'data_gathering',
+                                parameters: { sources: [input] }
+                            },
+                            {
+                                name: 'processing',
+                                type: 'agent_task',
+                                agent_id: 'analysis-001',
+                                task_type: 'process_data',
+                                parameters: { pipeline: [{ operation: 'filter' }] }
+                            }
+                        ]
+                    };
+                
+                case 'multi_agent_coordination':
+                    return {
+                        type: 'multi_agent_coordination',
+                        steps: [
+                            {
+                                name: 'coordination',
+                                type: 'agent_task',
+                                agent_id: 'coordinator-001',
+                                task_type: 'coordinate_workflow',
+                                parameters: {
+                                    workflow_definition: {
+                                        type: 'coordinated_research',
+                                        agents: ['research-001', 'analysis-001'],
+                                        steps: [
+                                            { agent_id: 'research-001', task_type: 'research' },
+                                            { agent_id: 'analysis-001', task_type: 'analysis' }
+                                        ]
+                                    }
+                                }
+                            }
+                        ]
+                    };
+                
+                default:
+                    return { type: 'simple', steps: [] };
+            }
+        }
+
+        function displayTaskResult(task) {
+            console.log('Displaying task result:', task);
+            
+            // Add a detailed log entry
+            addLog(`Task completed with result: ${task.task.type}`, 'success');
+            
+            // Create a results section if it doesn't exist
+            let resultsContainer = document.getElementById('results-container');
+            if (!resultsContainer) {
+                const resultsCard = document.createElement('div');
+                resultsCard.className = 'card';
+                resultsCard.innerHTML = `
+                    <h3>Task Results</h3>
+                    <div id="results-container" class="results-list">
+                        <!-- Results will appear here -->
+                    </div>
+                `;
+                document.querySelector('.container').insertBefore(resultsCard, document.querySelector('.card:last-of-type'));
+                resultsContainer = document.getElementById('results-container');
+            }
+            
+            // Create result item
+            const resultItem = document.createElement('div');
+            resultItem.className = 'task-item';
+            resultItem.innerHTML = `
+                <h4>✅ Task Completed - ${task.task.type}</h4>
+                <p><strong>Task ID:</strong> ${task.task.id}</p>
+                <p><strong>Agent:</strong> ${task.task.agent_id || 'Unknown'}</p>
+                <p><strong>Query:</strong> ${task.task.parameters?.query || 'No query'}</p>
+                <p><strong>Completed:</strong> ${new Date().toLocaleTimeString()}</p>
+                <div style="background: #e8f5e8; padding: 10px; border-radius: 4px; margin-top: 10px;">
+                    <strong>Result:</strong>
+                    <pre style="margin: 5px 0; white-space: pre-wrap; font-size: 12px;">${JSON.stringify(task.result, null, 2)}</pre>
+                </div>
+            `;
+            
+            // Add to results container
+            resultsContainer.insertBefore(resultItem, resultsContainer.firstChild);
+            
+            // Keep only last 10 results
+            while (resultsContainer.children.length > 10) {
+                resultsContainer.removeChild(resultsContainer.lastChild);
+            }
+        }
+
+        function displayWorkflowResult(workflow) {
+            console.log('Displaying workflow result:', workflow);
+            
+            // Add a detailed log entry
+            addLog(`Workflow completed: ${workflow.type}`, 'success');
+            
+            // Create a results section if it doesn't exist
+            let resultsContainer = document.getElementById('results-container');
+            if (!resultsContainer) {
+                const resultsCard = document.createElement('div');
+                resultsCard.className = 'card';
+                resultsCard.innerHTML = `
+                    <h3>Task Results</h3>
+                    <div id="results-container" class="results-list">
+                        <!-- Results will appear here -->
+                    </div>
+                `;
+                document.querySelector('.container').insertBefore(resultsCard, document.querySelector('.card:last-of-type'));
+                resultsContainer = document.getElementById('results-container');
+            }
+            
+            // Create workflow result item
+            const resultItem = document.createElement('div');
+            resultItem.className = 'task-item';
+            resultItem.innerHTML = `
+                <h4>🔄 Workflow Completed - ${workflow.type}</h4>
+                <p><strong>Workflow ID:</strong> ${workflow.id}</p>
+                <p><strong>Status:</strong> ${workflow.status}</p>
+                <p><strong>Steps:</strong> ${workflow.steps?.length || 0}</p>
+                <p><strong>Completed:</strong> ${new Date().toLocaleTimeString()}</p>
+                <div style="background: #e8f5e8; padding: 10px; border-radius: 4px; margin-top: 10px;">
+                    <strong>Results:</strong>
+                    <pre style="margin: 5px 0; white-space: pre-wrap; font-size: 12px;">${JSON.stringify(workflow.results, null, 2)}</pre>
+                </div>
+            `;
+            
+            // Add to results container
+            resultsContainer.insertBefore(resultItem, resultsContainer.firstChild);
+            
+            // Keep only last 10 results
+            while (resultsContainer.children.length > 10) {
+                resultsContainer.removeChild(resultsContainer.lastChild);
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, initializing socket...');
+            initSocket();
+        });
+    </script>
+</body>
+</html>

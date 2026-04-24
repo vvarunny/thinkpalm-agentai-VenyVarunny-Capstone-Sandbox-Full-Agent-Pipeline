@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic Pipeline - Working Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group select, .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e1e5e9;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            margin-right: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .logs {
+            max-height: 400px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 15px;
+        }
+        
+        .log-entry {
+            background: white;
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-left: 3px solid #667eea;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+        }
+        
+        .log-entry.error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        
+        .log-entry.success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        
+        .status {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .task-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .task-item h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .task-item p {
+            color: #666;
+            margin: 5px 0;
+        }
+        
+        .status-running { color: #007bff; }
+        .status-completed { color: #28a745; }
+        .status-failed { color: #dc3545; }
+        .status-submitted { color: #6c757d; }
+        
+        .result-item {
+            background: #e8f5e8;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .result-item pre {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Agentic Pipeline - Working Interface</h1>
+            <p>Multi-Agent System with Direct API Integration</p>
+        </div>
+        
+        <div class="card">
+            <h3>System Status</h3>
+            <div class="status" id="system-status">
+                <div class="status-item">
+                    <span>Server Status:</span>
+                    <span id="server-status">Checking...</span>
+                </div>
+                <div class="status-item">
+                    <span>Total Tasks:</span>
+                    <span id="total-tasks">0</span>
+                </div>
+                <div class="status-item">
+                    <span>Completed Tasks:</span>
+                    <span id="completed-tasks">0</span>
+                </div>
+                <div class="status-item">
+                    <span>Failed Tasks:</span>
+                    <span id="failed-tasks">0</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>Submit Task</h3>
+            <div class="form-group">
+                <label for="agent-select">Target Agent:</label>
+                <select id="agent-select">
+                    <option value="research-001">Research Agent</option>
+                    <option value="analysis-001">Analysis Agent</option>
+                    <option value="coordinator-001">Coordinator Agent</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="task-type">Task Type:</label>
+                <select id="task-type">
+                    <option value="research">Research Task</option>
+                    <option value="analysis">Analysis Task</option>
+                    <option value="workflow">Workflow Task</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="task-query">Query/Parameters:</label>
+                <textarea id="task-query" rows="3" placeholder="Enter your query or task parameters..."></textarea>
+            </div>
+            <button class="btn" id="submit-btn" onclick="submitTask()">Submit Task</button>
+            <button class="btn" onclick="refreshStatus()">Refresh Status</button>
+        </div>
+        
+        <div class="card">
+            <h3>Execute Workflow</h3>
+            <div class="form-group">
+                <label for="workflow-type">Workflow Type:</label>
+                <select id="workflow-type">
+                    <option value="research_analysis">Research & Analysis</option>
+                    <option value="data_pipeline">Data Pipeline</option>
+                    <option value="multi_agent_coordination">Multi-Agent Coordination</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="workflow-input">Input Data:</label>
+                <textarea id="workflow-input" rows="3" placeholder="Enter workflow input data..."></textarea>
+            </div>
+            <button class="btn" id="workflow-btn" onclick="executeWorkflow()">Execute Workflow</button>
+        </div>
+        
+        <div class="card">
+            <h3>Task Results</h3>
+            <div id="results-container">
+                <p>No tasks submitted yet.</p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>System Logs</h3>
+            <div class="logs" id="logs-container">
+                <div class="log-entry">[System] Initializing...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let taskCounter = 0;
+        let metrics = {
+            total: 0,
+            completed: 0,
+            failed: 0
+        };
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            addLog('[System] Page loaded successfully', 'success');
+            checkServerStatus();
+            refreshStatus();
+        });
+
+        async function checkServerStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                document.getElementById('server-status').innerHTML = '<span class="status-completed">✅ Online</span>';
+                addLog('[System] Server is online and responding', 'success');
+                updateSystemStatus(data);
+            } catch (error) {
+                document.getElementById('server-status').innerHTML = '<span class="status-failed">❌ Offline</span>';
+                addLog('[System] Server is offline: ' + error.message, 'error');
+            }
+        }
+
+        async function refreshStatus() {
+            try {
+                addLog('[System] Refreshing system status...', 'info');
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                updateSystemStatus(data);
+                addLog('[System] Status updated successfully', 'success');
+            } catch (error) {
+                addLog('[System] Failed to refresh status: ' + error.message, 'error');
+            }
+        }
+
+        function updateSystemStatus(data) {
+            if (data.metrics) {
+                metrics.total = data.metrics.total_tasks || 0;
+                metrics.completed = data.metrics.completed_tasks || 0;
+                metrics.failed = data.metrics.failed_tasks || 0;
+                
+                document.getElementById('total-tasks').textContent = metrics.total;
+                document.getElementById('completed-tasks').textContent = metrics.completed;
+                document.getElementById('failed-tasks').textContent = metrics.failed;
+            }
+        }
+
+        async function submitTask() {
+            const agentId = document.getElementById('agent-select').value;
+            const taskType = document.getElementById('task-type').value;
+            const query = document.getElementById('task-query').value;
+
+            if (!query.trim()) {
+                addLog('[Error] Please enter a query or parameters', 'error');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading"></span> Submitting...';
+
+            const task = {
+                type: taskType,
+                agent_id: agentId,
+                parameters: {
+                    query: query,
+                    analysis_type: 'summary'
+                }
+            };
+
+            try {
+                addLog(`[Task] Submitting ${taskType} task: "${query}"`, 'info');
+                
+                const response = await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ task, priority: 'normal' })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    addLog(`[Task] ✅ Task submitted successfully with ID: ${result.task_id}`, 'success');
+                    metrics.total++;
+                    updateMetrics();
+                    document.getElementById('task-query').value = '';
+                    
+                    // Monitor task completion
+                    monitorTask(result.task_id, query);
+                } else {
+                    addLog(`[Task] ❌ Task submission failed: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`[Task] ❌ Network error: ${error.message}`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Submit Task';
+            }
+        }
+
+        async function executeWorkflow() {
+            const workflowType = document.getElementById('workflow-type').value;
+            const input = document.getElementById('workflow-input').value;
+
+            if (!input.trim()) {
+                addLog('[Error] Please enter workflow input data', 'error');
+                return;
+            }
+
+            const workflowBtn = document.getElementById('workflow-btn');
+            workflowBtn.disabled = true;
+            workflowBtn.innerHTML = '<span class="loading"></span> Executing...';
+
+            const workflow = getWorkflowDefinition(workflowType, input);
+            
+            try {
+                addLog(`[Workflow] Executing ${workflowType} workflow: "${input}"`, 'info');
+                
+                const response = await fetch('/api/workflows', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ workflow, context: { input } })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    addLog(`[Workflow] ✅ Workflow submitted successfully with ID: ${result.workflow_id}`, 'success');
+                    document.getElementById('workflow-input').value = '';
+                    
+                    // Monitor workflow completion
+                    monitorWorkflow(result.workflow_id, workflowType);
+                } else {
+                    addLog(`[Workflow] ❌ Workflow submission failed: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`[Workflow] ❌ Network error: ${error.message}`, 'error');
+            } finally {
+                workflowBtn.disabled = false;
+                workflowBtn.innerHTML = 'Execute Workflow';
+            }
+        }
+
+        async function monitorTask(taskId, query) {
+            addLog(`[Monitor] 📡 Watching task ${taskId} for completion...`, 'info');
+            
+            const startTime = Date.now();
+            const maxWaitTime = 60000; // 60 seconds
+            
+            const checkInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`/api/tasks/${taskId}`);
+                    const data = await response.json();
+                    
+                    if (data.status === 'completed') {
+                        clearInterval(checkInterval);
+                        const duration = Date.now() - startTime;
+                        addLog(`[Monitor] ✅ Task ${taskId} completed in ${duration}ms`, 'success');
+                        metrics.completed++;
+                        updateMetrics();
+                        displayTaskResult(taskId, query, data.result);
+                        refreshStatus();
+                    } else if (data.status === 'failed') {
+                        clearInterval(checkInterval);
+                        addLog(`[Monitor] ❌ Task ${taskId} failed: ${data.error}`, 'error');
+                        metrics.failed++;
+                        updateMetrics();
+                        refreshStatus();
+                    } else if (Date.now() - startTime > maxWaitTime) {
+                        clearInterval(checkInterval);
+                        addLog(`[Monitor] ⏰ Task ${taskId} timed out after ${maxWaitTime}ms`, 'error');
+                    } else {
+                        addLog(`[Monitor] ⏳ Task ${taskId} status: ${data.status}`, 'info');
+                    }
+                } catch (error) {
+                    addLog(`[Monitor] ❌ Error checking task ${taskId}: ${error.message}`, 'error');
+                }
+            }, 2000); // Check every 2 seconds
+        }
+
+        async function monitorWorkflow(workflowId, workflowType) {
+            addLog(`[Monitor] 📡 Watching workflow ${workflowId} for completion...`, 'info');
+            
+            const startTime = Date.now();
+            const maxWaitTime = 120000; // 2 minutes
+            
+            const checkInterval = setInterval(async () => {
+                try {
+                    const response = await fetch('/api/status');
+                    const data = await response.json();
+                    
+                    const workflow = data.workflows?.find(w => w.id === workflowId);
+                    
+                    if (workflow && workflow.status === 'completed') {
+                        clearInterval(checkInterval);
+                        const duration = Date.now() - startTime;
+                        addLog(`[Monitor] ✅ Workflow ${workflowId} completed in ${duration}ms`, 'success');
+                        displayWorkflowResult(workflowId, workflowType, workflow.results);
+                        refreshStatus();
+                    } else if (workflow && workflow.status === 'failed') {
+                        clearInterval(checkInterval);
+                        addLog(`[Monitor] ❌ Workflow ${workflowId} failed`, 'error');
+                        refreshStatus();
+                    } else if (Date.now() - startTime > maxWaitTime) {
+                        clearInterval(checkInterval);
+                        addLog(`[Monitor] ⏰ Workflow ${workflowId} timed out after ${maxWaitTime}ms`, 'error');
+                    } else {
+                        addLog(`[Monitor] ⏳ Workflow ${workflowId} status: ${workflow?.status || 'unknown'}`, 'info');
+                    }
+                } catch (error) {
+                    addLog(`[Monitor] ❌ Error checking workflow ${workflowId}: ${error.message}`, 'error');
+                }
+            }, 3000); // Check every 3 seconds
+        }
+
+        function getWorkflowDefinition(type, input) {
+            switch (type) {
+                case 'research_analysis':
+                    return {
+                        type: 'research_analysis',
+                        steps: [
+                            {
+                                name: 'research',
+                                type: 'agent_task',
+                                agent_id: 'research-001',
+                                task_type: 'research',
+                                parameters: { query: input }
+                            },
+                            {
+                                name: 'analysis',
+                                type: 'agent_task',
+                                agent_id: 'analysis-001',
+                                task_type: 'analysis',
+                                parameters: { data: 'research_result' }
+                            }
+                        ]
+                    };
+                
+                case 'data_pipeline':
+                    return {
+                        type: 'data_pipeline',
+                        steps: [
+                            {
+                                name: 'collection',
+                                type: 'agent_task',
+                                agent_id: 'research-001',
+                                task_type: 'data_gathering',
+                                parameters: { sources: [input] }
+                            },
+                            {
+                                name: 'processing',
+                                type: 'agent_task',
+                                agent_id: 'analysis-001',
+                                task_type: 'process_data',
+                                parameters: { pipeline: [{ operation: 'filter' }] }
+                            }
+                        ]
+                    };
+                
+                case 'multi_agent_coordination':
+                    return {
+                        type: 'multi_agent_coordination',
+                        steps: [
+                            {
+                                name: 'coordination',
+                                type: 'agent_task',
+                                agent_id: 'coordinator-001',
+                                task_type: 'coordinate_workflow',
+                                parameters: {
+                                    workflow_definition: {
+                                        type: 'coordinated_research',
+                                        agents: ['research-001', 'analysis-001'],
+                                        steps: [
+                                            { agent_id: 'research-001', task_type: 'research' },
+                                            { agent_id: 'analysis-001', task_type: 'analysis' }
+                                        ]
+                                    }
+                                }
+                            }
+                        ]
+                    };
+                
+                default:
+                    return { type: 'simple', steps: [] };
+            }
+        }
+
+        function displayTaskResult(taskId, query, result) {
+            const resultsContainer = document.getElementById('results-container');
+            
+            if (resultsContainer.children.length === 1 && resultsContainer.children[0].textContent === 'No tasks submitted yet.') {
+                resultsContainer.innerHTML = '';
+            }
+            
+            const resultItem = document.createElement('div');
+            resultItem.className = 'result-item';
+            resultItem.innerHTML = `
+                <h4>✅ Task Completed - Research</h4>
+                <p><strong>Task ID:</strong> ${taskId}</p>
+                <p><strong>Query:</strong> ${query}</p>
+                <p><strong>Completed:</strong> ${new Date().toLocaleTimeString()}</p>
+                <div>
+                    <strong>Result:</strong>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                </div>
+            `;
+            
+            resultsContainer.insertBefore(resultItem, resultsContainer.firstChild);
+            
+            // Keep only last 10 results
+            while (resultsContainer.children.length > 10) {
+                resultsContainer.removeChild(resultsContainer.lastChild);
+            }
+        }
+
+        function displayWorkflowResult(workflowId, workflowType, results) {
+            const resultsContainer = document.getElementById('results-container');
+            
+            if (resultsContainer.children.length === 1 && resultsContainer.children[0].textContent === 'No tasks submitted yet.') {
+                resultsContainer.innerHTML = '';
+            }
+            
+            const resultItem = document.createElement('div');
+            resultItem.className = 'result-item';
+            resultItem.innerHTML = `
+                <h4>🔄 Workflow Completed - ${workflowType}</h4>
+                <p><strong>Workflow ID:</strong> ${workflowId}</p>
+                <p><strong>Completed:</strong> ${new Date().toLocaleTimeString()}</p>
+                <div>
+                    <strong>Results:</strong>
+                    <pre>${JSON.stringify(results, null, 2)}</pre>
+                </div>
+            `;
+            
+            resultsContainer.insertBefore(resultItem, resultsContainer.firstChild);
+            
+            // Keep only last 10 results
+            while (resultsContainer.children.length > 10) {
+                resultsContainer.removeChild(resultsContainer.lastChild);
+            }
+        }
+
+        function updateMetrics() {
+            document.getElementById('total-tasks').textContent = metrics.total;
+            document.getElementById('completed-tasks').textContent = metrics.completed;
+            document.getElementById('failed-tasks').textContent = metrics.failed;
+        }
+
+        function addLog(message, type = 'info') {
+            const logsContainer = document.getElementById('logs-container');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            
+            logsContainer.appendChild(logEntry);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+            
+            // Keep only last 50 logs
+            while (logsContainer.children.length > 50) {
+                logsContainer.removeChild(logsContainer.firstChild);
+            }
+        }
+    </script>
+</body>
+</html>
