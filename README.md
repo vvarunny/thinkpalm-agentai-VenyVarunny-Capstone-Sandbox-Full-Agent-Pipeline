@@ -1,37 +1,48 @@
-# 🤖 Agentic Pipeline System
+# Name : Veny Varunny
+# Track : Backend Dev
+# Lab name : thinkpalm-agentai-VenyVarunny-Capstone-Sandbox-Full-Agent-Pipeline
 
-A complete end-to-end agentic pipeline featuring memory, tool-calling, multiple specialized agents, and an interactive web UI.
+
+
+# 🔍 AI Code Review & Bug Detection System
+
+An intelligent code analysis system featuring multi-agent bug detection, real-time triage, and interactive web-based code review interface.
 
 ## 🌟 Features
 
 ### Core Components
-- **Memory System**: Persistent SQLite-based storage for agent memories and states
-- **Tool-Calling Framework**: Extensible registry of tools (web search, scraping, analysis, data processing)
-- **3 Specialized Agents**: Research Agent, Analysis Agent, and Coordinator Agent
-- **Task Queue & Pipeline**: Concurrent task execution with priority support
-- **Error Handling & Recovery**: Graceful failure management and retry mechanisms
-- **Real-time Communication**: WebSocket-based agent coordination
-- **Interactive Web UI**: React-based dashboard for monitoring and control
+- **AI-Powered Bug Detection**: Advanced pattern recognition for common programming errors
+- **Multi-Agent Analysis**: Specialized agents for research, analysis, and coordination
+- **Real-time Code Triage**: Automatic bug severity classification and prioritization
+- **Interactive Web UI**: Modern interface for code submission and analysis results
+- **Memory System**: Persistent storage for analysis history and agent learning
+- **WebSocket Communication**: Real-time updates and live analysis progress
 
-### Agent Capabilities
+### Bug Detection Capabilities
 
-#### Research Agent
-- Web search and information gathering
-- Content scraping from web pages
-- Data collection from multiple sources
-- Information synthesis and summarization
+#### Security Vulnerabilities
+- SQL Injection detection
+- XSS (Cross-Site Scripting) identification
+- CORS misconfiguration analysis
+- Input validation vulnerabilities
 
-#### Analysis Agent
-- Text analysis (sentiment, entities, topics, summary)
-- Data processing and transformation
-- Pattern recognition and insight generation
-- Statistical analysis and trend detection
+#### Runtime Errors
+- Division by zero detection
+- Null reference exceptions
+- Array index out of bounds
+- Undefined variable usage
 
-#### Coordinator Agent
-- Task orchestration and workflow management
-- Multi-agent coordination
-- Resource allocation and load balancing
-- Workflow execution monitoring
+#### Code Quality Issues
+- Syntax errors and typos
+- Missing semicolons and brackets
+- Function name misspellings
+- Inconsistent coding patterns
+
+#### Performance Issues
+- Memory leak detection
+- Inefficient loops
+- Resource management problems
+- Unoptimized database queries
 
 ## 🚀 Quick Start
 
@@ -58,7 +69,9 @@ npm start
 
 ### Access the System
 
-- **Web UI**: http://localhost:3000
+- **Code Review Interface**: http://localhost:3000/code-review
+- **Working Interface**: http://localhost:3000/working
+- **Simple Interface**: http://localhost:3000/simple
 - **API Status**: http://localhost:3000/api/status
 - **Live Demo**: `npm run demo`
 
@@ -66,50 +79,51 @@ npm start
 
 ### Interactive UI
 
-1. **Agents Tab**: Monitor agent status, capabilities, and send direct messages
-2. **Tasks Tab**: View task queue status and execution metrics
-3. **Workflows Tab**: Monitor active and completed workflows
-4. **Controls Tab**: Submit tasks and execute workflows
-5. **Logs Tab**: Real-time system activity logs
+1. **Code Review Interface**: Submit code for comprehensive bug analysis
+2. **Bug Triage Report**: View categorized bugs with severity levels
+3. **Real-time Analysis**: Watch agents process code in real-time
+4. **Action Plan**: Get prioritized fixes for identified issues
+5. **Multiple Interfaces**: Choose between simple, working, or full review interfaces
 
 ### API Usage
 
-#### Submit a Task
+#### Submit Code for Analysis
 ```bash
 curl -X POST http://localhost:3000/api/tasks \
   -H "Content-Type: application/json" \
   -d '{
     "task": {
-      "type": "research",
+      "type": "analysis",
       "parameters": {
-        "query": "artificial intelligence trends 2024"
+        "code": "console.log('Hello World');",
+        "language": "javascript"
       }
     },
     "priority": "high"
   }'
 ```
 
-#### Execute a Workflow
+#### Execute Code Analysis Workflow
 ```bash
 curl -X POST http://localhost:3000/api/workflows \
   -H "Content-Type: application/json" \
   -d '{
     "workflow": {
-      "type": "research_analysis",
+      "type": "code_review",
       "steps": [
         {
-          "name": "research",
+          "name": "syntax_check",
           "type": "agent_task",
-          "agent_id": "research-001",
-          "task_type": "research",
-          "parameters": {"query": "AI trends"}
-        },
-        {
-          "name": "analysis",
-          "type": "agent_task", 
           "agent_id": "analysis-001",
           "task_type": "analysis",
-          "parameters": {"analysis_type": "summary"}
+          "parameters": {"analysis_type": "syntax"}
+        },
+        {
+          "name": "security_scan",
+          "type": "agent_task", 
+          "agent_id": "research-001",
+          "task_type": "security_analysis",
+          "parameters": {"scan_type": "vulnerabilities"}
         }
       ]
     }
@@ -157,32 +171,37 @@ curl -X POST http://localhost:3000/api/agents/research-001/message \
 
 ## 🧪 Demo Scenarios
 
-The system includes comprehensive demo scenarios showcasing all features:
+The system includes comprehensive demo scenarios showcasing bug detection capabilities:
 
-### Demo 1: Basic Research Workflow
-- Research task submission and execution
-- Analysis of research results
-- Memory persistence verification
+### Demo 1: JavaScript Bug Detection
+- Syntax error identification
+- Runtime error detection
+- Security vulnerability scanning
+- Performance issue analysis
 
-### Demo 2: Multi-Agent Coordination
-- Complex workflow with multiple agents
-- Coordinator agent orchestration
-- Inter-agent communication
+### Demo 2: Multi-Language Support
+- JavaScript/TypeScript analysis
+- Python code review
+- C# bug detection
+- Cross-language pattern recognition
 
-### Demo 3: Parallel Processing
-- Concurrent task execution
-- Data pipeline processing
-- Performance optimization
+### Demo 3: Real-time Analysis
+- Live code processing
+- Concurrent agent coordination
+- Progress tracking
+- Interactive result display
 
-### Demo 4: Error Handling
-- Graceful failure management
-- Recovery mechanisms
-- Conditional workflow execution
+### Demo 4: Advanced Bug Triage
+- Severity classification
+- Priority-based fixing
+- Action plan generation
+- Comprehensive reporting
 
-### Demo 5: Memory & Persistence
-- Memory storage and retrieval
-- Agent state management
-- Search functionality
+### Demo 5: Memory & Learning
+- Analysis history storage
+- Pattern learning
+- Agent state persistence
+- Search and recall capabilities
 
 Run the demo: `npm run demo`
 
@@ -272,18 +291,19 @@ MIT License - see LICENSE file for details
 ## 🎯 Educational Value
 
 This project demonstrates:
-- **Multi-agent systems**: Coordination between specialized AI agents
-- **Memory management**: Persistent context and state management
-- **Tool integration**: Extensible capability framework
-- **Real-time communication**: WebSocket-based agent messaging
-- **Workflow orchestration**: Complex multi-step process automation
-- **Error handling**: Robust failure recovery mechanisms
-- **Web integration**: Full-stack AI system with modern UI
+- **AI-Powered Code Analysis**: Intelligent bug detection and pattern recognition
+- **Multi-Agent Systems**: Specialized agents for different analysis types
+- **Real-time Processing**: Live code analysis with WebSocket updates
+- **Security Scanning**: Automated vulnerability detection
+- **Code Quality Assessment**: Comprehensive code review automation
+- **Interactive UI**: Modern web-based code review interface
+- **Memory Management**: Persistent analysis history and learning
 
 Perfect for learning about:
-- Agent-based AI architectures
-- Event-driven programming
+- Static code analysis techniques
+- Multi-agent AI architectures
 - Real-time web applications
-- Database integration
-- API design and implementation
+- Security vulnerability detection
 - Modern JavaScript/Node.js development
+- Database integration for AI systems
+- WebSocket-based communication

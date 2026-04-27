@@ -32,7 +32,7 @@ export default {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './src/ui/index.html',
+      template: './src/ui/code_review.html',
       filename: 'index.html'
     })
   ],

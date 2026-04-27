@@ -1,0 +1,20 @@
+// Test case for "pit" typo detection
+
+pit("Hello World");           // Should detect as typo for "print"
+pt("Another test");           // Should detect as typo for "print"
+pr("Short test");             // Should detect as typo for "print"
+pi("Very short");             // Should detect as typo for "print"
+
+// Other short typos
+ln([1,2,3]);                 // Should detect as typo for "len"
+rn(5);                       // Should detect as typo for "range"
+in("input");                 // Should detect as typo for "input"
+
+// Python examples
+pit("Python test");           // Should detect as typo for "print"
+ln([1,2,3,4]);              // Should detect as typo for "len"
+rn(10);                      // Should detect as typo for "range"
+
+// C# examples
+Con("C# test");              // Should detect as typo for "Console"
+Wr("Write");                 // Should detect as typo for "Write"

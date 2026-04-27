@@ -1,7 +1,7 @@
 {
-  "name": "agentic-pipeline",
+  "name": "bug-triage-system",
   "version": "1.0.0",
-  "description": "Complete end-to-end agentic pipeline with memory, tool-calling, and multiple agents",
+  "description": "AI-powered code review and bug detection system with real-time triage",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
@@ -9,7 +9,6 @@
     "dev": "nodemon src/index.js",
     "build": "webpack --mode production",
     "serve": "webpack serve --mode development",
-    "demo": "node src/demo/DemoScenario.js",
     "test": "jest"
   },
   "dependencies": {
@@ -37,7 +36,7 @@
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.15.1"
   },
-  "keywords": ["ai", "agents", "pipeline", "memory", "tools"],
-  "author": "AI Pipeline",
+  "keywords": ["ai", "code-review", "bug-detection", "triage", "analysis"],
+  "author": "Bug Triage System",
   "license": "MIT"
 }

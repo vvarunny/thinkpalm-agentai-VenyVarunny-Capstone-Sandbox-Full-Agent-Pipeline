@@ -6,9 +6,7 @@ import { fileURLToPath } from 'url';
 import { MemorySystem } from './memory/MemorySystem.js';
 import { ToolRegistry } from './tools/ToolRegistry.js';
 import { Pipeline } from './pipeline/Pipeline.js';
-import { ResearchAgent } from './agents/ResearchAgent.js';
 import { AnalysisAgent } from './agents/AnalysisAgent.js';
-import { CoordinatorAgent } from './agents/CoordinatorAgent.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -37,24 +35,29 @@ class AgenticPipelineServer {
 
   setupAgents() {
     // Create agents
-    this.researchAgent = new ResearchAgent('research-001', this.memorySystem, this.toolRegistry);
     this.analysisAgent = new AnalysisAgent('analysis-001', this.memorySystem, this.toolRegistry);
-    this.coordinatorAgent = new CoordinatorAgent('coordinator-001', this.memorySystem, this.toolRegistry);
     
     // Register agents with pipeline
-    this.pipeline.registerAgent(this.researchAgent);
     this.pipeline.registerAgent(this.analysisAgent);
-    this.pipeline.registerAgent(this.coordinatorAgent);
-    
-    // Register agents with coordinator
-    this.coordinatorAgent.registerAgent(this.researchAgent);
-    this.coordinatorAgent.registerAgent(this.analysisAgent);
     
     // Set up pipeline event forwarding to WebSocket clients
     this.setupPipelineEventForwarding();
   }
 
   setupMiddleware() {
+    // Enable CORS for all routes
+    this.app.use((req, res, next) => {
+      res.header('Access-Control-Allow-Origin', '*');
+      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+      res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+      
+      if (req.method === 'OPTIONS') {
+        res.sendStatus(200);
+      } else {
+        next();
+      }
+    });
+    
     this.app.use(express.json());
     this.app.use(express.static(path.join(__dirname, '../dist')));
   }
@@ -65,15 +68,6 @@ class AgenticPipelineServer {
       res.sendFile(path.join(__dirname, 'ui', 'code_review.html'));
     });
 
-    // Serve working interface
-    this.app.get('/working', (req, res) => {
-      res.sendFile(path.join(__dirname, 'ui', 'working.html'));
-    });
-
-    // Serve simple interface
-    this.app.get('/simple', (req, res) => {
-      res.sendFile(path.join(__dirname, 'ui', 'simple.html'));
-    });
 
     // API Routes
     this.app.get('/api/status', (req, res) => {
@@ -152,8 +146,17 @@ class AgenticPipelineServer {
     });
 
     // Serve the UI
+    this.app.get('/', (req, res) => {
+      res.sendFile(path.join(__dirname, 'ui/code_review.html'));
+    });
+    
+    this.app.get('/code-review', (req, res) => {
+      res.sendFile(path.join(__dirname, 'ui/code_review.html'));
+    });
+    
+    // Fallback route
     this.app.get('*', (req, res) => {
-      res.sendFile(path.join(__dirname, '../dist/index.html'));
+      res.sendFile(path.join(__dirname, 'ui/code_review.html'));
     });
   }
 
@@ -256,22 +259,5 @@ class AgenticPipelineServer {
     this.server.close();
   }
 }
-
-// Start the server
-const server = new AgenticPipelineServer(3000);
-server.start();
-
-// Handle graceful shutdown
-process.on('SIGINT', async () => {
-  console.log('Shutting down gracefully...');
-  await server.shutdown();
-  process.exit(0);
-});
-
-process.on('SIGTERM', async () => {
-  console.log('Shutting down gracefully...');
-  await server.shutdown();
-  process.exit(0);
-});
 
 export default AgenticPipelineServer;

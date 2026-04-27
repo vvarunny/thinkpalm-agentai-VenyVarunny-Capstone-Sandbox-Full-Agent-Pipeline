@@ -53,17 +53,11 @@ export class Pipeline extends EventEmitter {
     } else if (task.type) {
       // Route based on task type
       switch (task.type) {
-        case 'research':
-        case 'data_gathering':
-          targetAgent = this.agents.get('research-001');
-          break;
         case 'analysis':
         case 'data_processing':
+        case 'code_review':
+        case 'bug_detection':
           targetAgent = this.agents.get('analysis-001');
-          break;
-        case 'coordinate_workflow':
-        case 'manage_agents':
-          targetAgent = this.agents.get('coordinator-001');
           break;
         default:
           throw new Error(`Unknown task type: ${task.type}`);

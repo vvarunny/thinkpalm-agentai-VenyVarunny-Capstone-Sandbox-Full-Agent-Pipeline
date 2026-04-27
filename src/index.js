@@ -1,23 +1,22 @@
 import AgenticPipelineServer from './server.js';
-import DemoScenario from './demo/DemoScenario.js';
 
 // Start the server
-const server = new AgenticPipelineServer(3000);
+const server = new AgenticPipelineServer(3003);
+server.start();
 
-// Optional: Run demo after server starts
+// Optional: Display startup message after server starts
 setTimeout(() => {
-  console.log('\n🎯 Agentic Pipeline System Started Successfully!');
+  console.log('\n🎯 Bug Triage System Started Successfully!');
   console.log('🌟 Features:');
-  console.log('  ✅ Memory System - Persistent agent memories');
-  console.log('  ✅ Tool-Calling Framework - Web search, scraping, analysis');
-  console.log('  ✅ 3 Specialized Agents - Research, Analysis, Coordinator');
-  console.log('  ✅ Task Queue & Pipeline - Concurrent execution');
-  console.log('  ✅ Error Handling & Recovery');
-  console.log('  ✅ Real-time Communication - WebSocket-based');
-  console.log('  ✅ Interactive Web UI - React dashboard');
-  console.log('\n🌐 Access the UI at: http://localhost:3000');
-  console.log('📊 View API docs at: http://localhost:3000/api/status');
-  console.log('\n💡 To run the demo scenario, use: npm run demo');
+  console.log('  ✅ AI-Powered Bug Detection - Advanced pattern recognition');
+  console.log('  ✅ Multi-Agent Analysis - Specialized code analysis agents');
+  console.log('  ✅ Real-time Code Triage - Automatic bug classification');
+  console.log('  ✅ Security Scanning - Vulnerability detection');
+  console.log('  ✅ Code Quality Assessment - Maintainability analysis');
+  console.log('  ✅ Memory System - Persistent analysis history');
+  console.log('  ✅ Interactive Web UI - Code review interface');
+  console.log('\n🌐 Access the Code Review UI at: http://localhost:3003/code-review');
+  console.log('📊 View API status at: http://localhost:3003/api/status');
   console.log('🛑 To stop the server, press Ctrl+C');
 }, 1000);
 

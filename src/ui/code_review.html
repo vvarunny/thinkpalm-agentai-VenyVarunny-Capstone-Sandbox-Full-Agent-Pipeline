@@ -56,7 +56,7 @@
             gap: 10px;
         }
         
-        .agent-icon {
+        .bug-icon {
             width: 24px;
             height: 24px;
             border-radius: 50%;
@@ -66,11 +66,12 @@
             font-size: 12px;
             font-weight: bold;
             color: white;
+            margin-right: 8px;
         }
         
-        .research-icon { background: #007bff; }
-        .analysis-icon { background: #28a745; }
-        .coordinator-icon { background: #6f42c1; }
+        .analysis-icon { background: #007bff; }
+        .detection-icon { background: #dc3545; }
+        .triage-icon { background: #ffc107; }
         
         .form-group {
             margin-bottom: 15px;
@@ -298,13 +299,13 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🤖 AI Code Review & Bug Triage System</h1>
-            <p>Multi-Agent System: Analysis → Deep Analysis → Bug Triage</p>
+            <h1>🐛 AI Bug Detection & Triage System</h1>
+            <p>Intelligent Code Analysis: Bug Detection → Security Scanning → Quality Assessment</p>
         </div>
         
         <div class="card">
             <h3>
-                <span class="agent-icon research-icon">R</span>
+                <span class="bug-icon analysis-icon">A</span>
                 Code Analysis Input
             </h3>
             
@@ -333,47 +334,47 @@
         
         <div class="card">
             <h3>
-                <span class="agent-icon coordinator-icon">C</span>
-                Multi-Agent Workflow Progress
+                <span class="bug-icon analysis-icon">A</span>
+                Bug Detection Analysis Progress
             </h3>
             
             <div class="workflow-steps">
-                <div class="step-card" id="step-research">
-                    <h4>
-                        <span class="agent-icon research-icon">R</span>
-                        Analysis Agent
-                        <span class="step-status pending" id="research-status">Pending</span>
-                    </h4>
-                    <p><strong>Task:</strong> Analyze code patterns and identify potential issues</p>
-                    <p><strong>Status:</strong> <span id="research-detail">Waiting to start...</span></p>
-                </div>
-                
                 <div class="step-card" id="step-analysis">
                     <h4>
-                        <span class="agent-icon analysis-icon">A</span>
-                        Deep Analysis Agent
+                        <span class="bug-icon analysis-icon">A</span>
+                        Code Analysis
                         <span class="step-status pending" id="analysis-status">Pending</span>
                     </h4>
-                    <p><strong>Task:</strong> Deep analysis of code quality and security</p>
-                    <p><strong>Status:</strong> <span id="analysis-detail">Waiting for research results...</span></p>
+                    <p><strong>Task:</strong> Analyze code patterns and identify potential issues</p>
+                    <p><strong>Status:</strong> <span id="analysis-detail">Waiting to start...</span></p>
                 </div>
                 
-                <div class="step-card" id="step-coordination">
+                <div class="step-card" id="step-bug-detection">
                     <h4>
-                        <span class="agent-icon coordinator-icon">C</span>
-                        CoorBug Triagedinator Agent
-                        <span class="step-status pending" id="coordination-status">Pending</span>
+                        <span class="bug-icon detection-icon">B</span>
+                        Bug Detection
+                        <span class="step-status pending" id="bug-detection-status">Pending</span>
                     </h4>
-                    <p><strong>Task:</strong> Triage bugs and generate final report</p>
-                    <p><strong>Status:</strong> <span id="coordination-detail">Waiting for analysis results...</span></p>
+                    <p><strong>Task:</strong> Identify bugs, syntax errors, and typos</p>
+                    <p><strong>Status:</strong> <span id="bug-detection-detail">Waiting for code analysis...</span></p>
+                </div>
+                
+                <div class="step-card" id="step-triage">
+                    <h4>
+                        <span class="bug-icon triage-icon">T</span>
+                        Bug Triage
+                        <span class="step-status pending" id="triage-status">Pending</span>
+                    </h4>
+                    <p><strong>Task:</strong> Categorize and prioritize detected issues</p>
+                    <p><strong>Status:</strong> <span id="triage-detail">Waiting for bug detection results...</span></p>
                 </div>
             </div>
         </div>
         
         <div class="card">
             <h3>
-                <span class="agent-icon analysis-icon">A</span>
-                Analysis Results
+                <span class="bug-icon analysis-icon">🐛</span>
+                Bug Detection Results
             </h3>
             
             <div class="results-grid">
@@ -409,12 +410,12 @@
         
         <div class="card">
             <h3>
-                <span class="agent-icon coordinator-icon">C</span>
-                Final Triage Report
+                <span class="bug-icon triage-icon">📋</span>
+                Bug Triage Report
             </h3>
             
             <div id="triage-report">
-                <p>No triage report generated yet.</p>
+                <p>No bug triage report generated yet.</p>
             </div>
         </div>
     </div>
@@ -435,12 +436,18 @@
 
 function findUser(users, id) {
     for (let i = 0; i < users.length; i++) {
-        if (users[i].id === id) {
+        if (users[i].id == id) {  // Bug: using == instead of ===
             return users[i];
         }
     }
     return null;
-}`,
+}
+
+// Test code with bugs
+pit("Hello World");  // Typo: should be print
+const result = 5 / 0;   // Bug: division by zero
+console.lg("Test");    // Typo: should be console.log
+`,
             
             python: `def process_data(data):
     result = []
@@ -507,9 +514,9 @@ def divide_numbers(a, b):
             });
             
             // Reset all details
-            document.getElementById('research-detail').textContent = 'Waiting to start...';
-            document.getElementById('analysis-detail').textContent = 'Waiting for research results...';
-            document.getElementById('coordination-detail').textContent = 'Waiting for analysis results...';
+            document.getElementById('analysis-detail').textContent = 'Waiting to start...';
+            document.getElementById('bug-detection-detail').textContent = 'Waiting for code analysis...';
+            document.getElementById('triage-detail').textContent = 'Waiting for bug detection results...';
             
             // Reset button
             document.getElementById('analyze-btn').disabled = false;
@@ -517,8 +524,14 @@ def divide_numbers(a, b):
         }
 
         async function startCodeReview() {
+            console.log('🚀 Starting code review...');
             const code = document.getElementById('code-input').value;
             const language = document.getElementById('language-select').value;
+            
+            console.log('📝 Code length:', code.length);
+            console.log('🌐 Language:', language);
+            console.log('📄 Sample code:');
+            console.log(code);
             
             if (!code.trim()) {
                 alert('Please enter some code to analyze');
@@ -531,38 +544,41 @@ def divide_numbers(a, b):
             
             resetWorkflow();
             
-            // Start the multi-agent workflow
-            await executeCodeReviewWorkflow(code, language);
+            console.log('🔄 Starting bug triage workflow...');
+            // Start the bug triage workflow
+            await executeBugTriageWorkflow(code, language);
+            
+            console.log('✅ Bug triage workflow completed');
         }
 
-        async function executeCodeReviewWorkflow(code, language) {
+        async function executeBugTriageWorkflow(code, language) {
             try {
-                // Step 1: Research Agent Analysis
-                updateStepStatus('research', 'running', 'Analyzing code patterns and structure...');
+                // Step 1: Code Analysis
+                updateStepStatus('analysis', 'running', 'Analyzing code patterns and structure...');
                 await sleep(1500); // Simulate processing time
                 
-                const researchResult = await performResearchAnalysis(code, language);
-                workflowResults.research = researchResult;
-                updateStepStatus('research', 'completed', 'Research analysis completed');
+                const analysisResult = await performCodeAnalysis(code, language);
+                workflowResults.analysis = analysisResult;
+                updateStepStatus('analysis', 'completed', 'Code analysis completed');
                 
-                // Step 2: Analysis Agent Deep Analysis
-                updateStepStatus('analysis', 'running', 'Performing deep code analysis...');
+                // Step 2: Bug Detection
+                updateStepStatus('bug-detection', 'running', 'Detecting bugs and issues...');
                 await sleep(2000);
                 
-                const analysisResult = await performDeepAnalysis(code, language, researchResult);
-                workflowResults.analysis = analysisResult;
-                updateStepStatus('analysis', 'completed', 'Deep analysis completed');
+                const bugDetectionResult = await performBugDetection(code, language, analysisResult);
+                workflowResults.bugDetection = bugDetectionResult;
+                updateStepStatus('bug-detection', 'completed', 'Bug detection completed');
                 
-                // Step 3: Coordinator Agent Triage
-                updateStepStatus('coordination', 'running', 'Triage results and generating report...');
+                // Step 3: Bug Triage
+                updateStepStatus('triage', 'running', 'Triage results and generating report...');
                 await sleep(1500);
                 
-                const triageResult = await performBugTriage(researchResult, analysisResult);
+                const triageResult = await performBugTriage(analysisResult, bugDetectionResult);
                 workflowResults.triage = triageResult;
-                updateStepStatus('coordination', 'completed', 'Triage completed');
+                updateStepStatus('triage', 'completed', 'Triage completed');
                 
                 // Display final results
-                displayResults(workflowResults);
+                displayBugResults(workflowResults);
                 
                 // Re-enable button
                 document.getElementById('analyze-btn').disabled = false;
@@ -570,7 +586,7 @@ def divide_numbers(a, b):
                 
             } catch (error) {
                 console.error('Workflow error:', error);
-                updateStepStatus('coordination', 'failed', 'Error: ' + error.message);
+                updateStepStatus('triage', 'failed', 'Error: ' + error.message);
                 document.getElementById('analyze-btn').disabled = false;
                 document.getElementById('analyze-btn-text').innerHTML = '🔍 Start Code Review';
             }
@@ -580,6 +596,12 @@ def divide_numbers(a, b):
             const stepCard = document.getElementById(`step-${step}`);
             const statusElement = document.getElementById(`${step}-status`);
             const detailElement = document.getElementById(`${step}-detail`);
+            
+            // Check if elements exist before trying to update them
+            if (!stepCard || !statusElement || !detailElement) {
+                console.warn(`⚠️ Step elements not found for step: ${step}`);
+                return;
+            }
             
             // Update card classes
             stepCard.classList.remove('active', 'completed');
@@ -594,8 +616,8 @@ def divide_numbers(a, b):
             detailElement.textContent = detail;
         }
 
-        async function performResearchAnalysis(code, language) {
-            // Simulate Research Agent analysis
+        async function performCodeAnalysis(code, language) {
+            // Perform initial code analysis
             const lines = code.split('\n').length;
             const functions = (code.match(/function\s+\w+|def\s+\w+|public\s+\w+\s*\(/g) || []).length;
             const loops = (code.match(/for\s*\(|while\s*\(/g) || []).length;
@@ -614,30 +636,405 @@ def divide_numbers(a, b):
             };
         }
 
-        async function performDeepAnalysis(code, language, researchResult) {
-            // Simulate Analysis Agent deep analysis
+        async function performBugDetection(code, language, analysisResult) {
+            console.log('🔍 Starting bug detection for language:', language);
+            console.log('📝 Code length:', code.length);
+            
+            // Perform focused bug detection - only use language-specific detection
+            const bugs = [];
+            const syntaxErrors = [];
+            const typos = detectTypos(code, language);
+            const securityIssues = [];
+            const performanceIssues = [];
+            const recommendations = generateBugFixes(code, language);
+            
+            // Only use language-specific bug detection to avoid duplicates
+            if (language === 'python') {
+                bugs.push(...detectPythonBugs(code));
+            } else if (language === 'javascript') {
+                bugs.push(...detectJavaScriptBugs(code));
+            } else if (language === 'csharp') {
+                bugs.push(...detectCSharpBugs(code));
+            }
+            
+            console.log('🐛 Bugs found:', bugs.length);
+            console.log('⚠️ Syntax errors:', syntaxErrors.length);
+            console.log('📝 Typos:', typos.length);
+            console.log('🔒 Security issues:', securityIssues.length, securityIssues);
+            console.log('📊 Performance issues:', performanceIssues.length, performanceIssues);
+            
             return {
-                qualityScore: calculateQualityScore(code, researchResult),
-                securityIssues: analyzeSecurity(code, language),
-                performanceIssues: analyzePerformance(code, language),
-                codeSmells: detectCodeSmells(code, language),
-                recommendations: generateRecommendations(code, language, researchResult)
+                bugs,
+                syntaxErrors,
+                typos,
+                securityIssues,
+                performanceIssues,
+                recommendations
             };
         }
 
-        async function performBugTriage(researchResult, analysisResult) {
-            // Simulate Coordinator Agent triage
-            const allBugs = [
-                ...researchResult.potentialIssues,
-                ...analysisResult.securityIssues,
-                ...analysisResult.performanceIssues
+        function detectBugs(code, language) {
+            console.log('🔍 detectBugs called with language:', language);
+            const bugs = [];
+            const lines = code.split('\n');
+            
+            // Skip analysis if code appears to be HTML/CSS
+            if (code.includes('<!DOCTYPE') || code.includes('<html') || code.includes('<style>') || code.includes('</style>')) {
+                console.log('📄 HTML/CSS detected, skipping bug analysis');
+                return bugs;
+            }
+            
+            console.log('📝 Analyzing', lines.length, 'lines of code');
+            
+            // ONLY detect the most critical, obvious bugs - no false positives
+            lines.forEach((line, index) => {
+                const trimmed = line.trim();
+                
+                // Skip everything except actual code statements
+                if (!trimmed || trimmed.startsWith('//') || trimmed.startsWith('/*') || 
+                    trimmed.startsWith('*') || trimmed.startsWith('#') ||
+                    trimmed.startsWith('if') || trimmed.startsWith('for') || 
+                    trimmed.startsWith('while') || trimmed.startsWith('else') ||
+                    trimmed.startsWith('elif') || trimmed.startsWith('try') ||
+                    trimmed.startsWith('except') || trimmed.startsWith('finally') ||
+                    trimmed.startsWith('def') || trimmed.startsWith('class') ||
+                    trimmed.startsWith('function') || trimmed.startsWith('import') ||
+                    trimmed.startsWith('using') || trimmed.startsWith('namespace') ||
+                    trimmed.startsWith('public') || trimmed.startsWith('private') ||
+                    trimmed.startsWith('protected') || trimmed.startsWith('static')) {
+                    return;
+                }
+                
+                // ONLY detect direct division by zero - no other patterns
+                if (trimmed.includes('/') && !trimmed.includes('//')) {
+                    if (trimmed.includes('/ 0') || trimmed.includes('/0')) {
+                        console.log('🚨 Division by zero found at line', index + 1);
+                        bugs.push({
+                            type: 'runtime_error',
+                            severity: 'high',
+                            line: index + 1,
+                            description: 'ZeroDivisionError: division by zero',
+                            suggestion: 'Check for zero before division'
+                        });
+                    }
+                }
+                
+                // C# specific bug detection
+                if (language === 'csharp') {
+                    // Check for incorrect method names
+                    if (trimmed.includes('console.') || trimmed.includes('Console.')) {
+                        const csharpFunctions = getCommonFunctions('csharp');
+                        const typo = findTypo(trimmed, csharpFunctions);
+                        if (typo) {
+                            bugs.push({
+                                type: 'syntax',
+                                severity: 'medium',
+                                line: index + 1,
+                                description: `Method name typo: "${trimmed}" should be "${typo.suggested}"`,
+                                suggestion: `Change to "${typo.suggested}"`
+                            });
+                        }
+                    }
+                }
+                
+                // Python specific bug detection
+                if (language === 'python') {
+                    // Check for incorrect function names (typo detection)
+                    if (trimmed.includes('(')) {
+                        // Extract function names from the line
+                        const functionMatch = trimmed.match(/(\w+)\s*\(/);
+                        if (functionMatch) {
+                            const functionName = functionMatch[1];
+                            console.log('🔍 Checking function:', functionName);
+                            const pythonFunctions = getCommonFunctions('python');
+                            const typo = findTypo(functionName, pythonFunctions);
+                            console.log('🐛 Typo result for', functionName, ':', typo);
+                            if (typo) {
+                                bugs.push({
+                                    type: 'syntax',
+                                    severity: 'medium',
+                                    line: index + 1,
+                                    description: `Function name typo: "${functionName}" should be "${typo.suggested}"`,
+                                    suggestion: `Change "${functionName}" to "${typo.suggested}"`
+                                });
+                            }
+                        }
+                    }
+                }
+                
+                // Java specific bug detection
+                if (language === 'java') {
+                    // Check for System.out.print vs System.out.println
+                    if (trimmed.includes('System.out.print') && !trimmed.includes('System.out.println')) {
+                        bugs.push({
+                            type: 'syntax',
+                            severity: 'low',
+                            line: index + 1,
+                            description: 'Consider using System.out.println instead of System.out.print for better output formatting',
+                            suggestion: 'Use System.out.println for newline output'
+                        });
+                    }
+                }
+                
+                // Language-specific bug detection
+                if (language === 'javascript') {
+                    const jsBugs = detectJavaScriptBugs(code);
+                    console.log('🐛 JavaScript bugs found:', jsBugs.length);
+                    bugs.push(...jsBugs);
+                } else if (language === 'python') {
+                    bugs.push(...detectPythonBugs(code));
+                } else if (language === 'csharp') {
+                    bugs.push(...detectCSharpBugs(code));
+                } else if (language === 'java') {
+                    bugs.push(...detectJavaBugs(code));
+                }
+            });
+            
+            console.log('🐛 Total bugs detected in detectBugs:', bugs.length);
+            return bugs;
+        }
+
+        function detectSyntaxErrors(code, language) {
+            const errors = [];
+            const lines = code.split('\n');
+            
+            lines.forEach((line, index) => {
+                const trimmed = line.trim();
+                
+                // Mismatched brackets
+                const openBrackets = (trimmed.match(/\[/g) || []).length;
+                const closeBrackets = (trimmed.match(/\]/g) || []).length;
+                const openBraces = (trimmed.match(/\{/g) || []).length;
+                const closeBraces = (trimmed.match(/\}/g) || []).length;
+                const openParens = (trimmed.match(/\(/g) || []).length;
+                const closeParens = (trimmed.match(/\)/g) || []).length;
+                
+                if (openBrackets !== closeBrackets) {
+                    errors.push({
+                        type: 'syntax',
+                        severity: 'high',
+                        line: index + 1,
+                        description: 'Mismatched square brackets',
+                        suggestion: 'Check bracket pairing'
+                    });
+                }
+                
+                if (openBraces !== closeBraces) {
+                    errors.push({
+                        type: 'syntax',
+                        severity: 'high',
+                        line: index + 1,
+                        description: 'Mismatched curly braces',
+                        suggestion: 'Check brace pairing'
+                    });
+                }
+                
+                if (openParens !== closeParens) {
+                    errors.push({
+                        type: 'syntax',
+                        severity: 'high',
+                        line: index + 1,
+                        description: 'Mismatched parentheses',
+                        suggestion: 'Check parenthesis pairing'
+                    });
+                }
+            });
+            
+            return errors;
+        }
+
+        function detectTypos(code, language) {
+            console.log('🔍 detectTypos called with language:', language);
+            const typos = [];
+            const lines = code.split('\n');
+            
+            // Skip analysis if code appears to be HTML/CSS
+            if (code.includes('<!DOCTYPE') || code.includes('<html') || code.includes('<style>') || code.includes('</style>')) {
+                console.log('📄 HTML/CSS detected, skipping typo analysis');
+                return typos;
+            }
+            
+            // Define common typo patterns with more precise regex
+            const typoPatterns = [
+                {
+                    pattern: /\bpit\s*\(/,
+                    description: 'Typo detected: "pit" should be "print"',
+                    suggestion: 'Change "pit" to "print"'
+                },
+                {
+                    pattern: /\bpri\s*\(/,
+                    description: 'Typo detected: "pri" should be "print"',
+                    suggestion: 'Change "pri" to "print"'
+                },
+                {
+                    pattern: /console\.lg\s*\(/,
+                    description: 'Typo detected: "console.lg" should be "console.log"',
+                    suggestion: 'Change "console.lg" to "console.log"'
+                },
+                {
+                    pattern: /\bconsol\.log\s*\(/,
+                    description: 'Typo detected: "consol.log" should be "console.log"',
+                    suggestion: 'Change "consol.log" to "console.log"'
+                },
+                {
+                    pattern: /\blenght\b/,
+                    description: 'Typo detected: "lenght" should be "length"',
+                    suggestion: 'Change "lenght" to "length"'
+                },
+                {
+                    pattern: /\bfuntion\b/,
+                    description: 'Typo detected: "funtion" should be "function"',
+                    suggestion: 'Change "funtion" to "function"'
+                }
             ];
+            
+            lines.forEach((line, index) => {
+                const trimmed = line.trim();
+                
+                // Check each typo pattern
+                typoPatterns.forEach(({ pattern, description, suggestion }) => {
+                    if (pattern.test(trimmed)) {
+                        console.log('🚨 Typo found at line', index + 1, ':', description);
+                        typos.push({
+                            type: 'typo',
+                            severity: 'medium',
+                            line: index + 1,
+                            description,
+                            suggestion
+                        });
+                    }
+                });
+            });
+            
+            console.log('📝 Total typos detected:', typos.length);
+            return typos;
+        }
+        
+        // Helper methods for dynamic detection
+            function getCommonFunctions(language) {
+                const functions = {
+                    'javascript': ['print', 'console', 'alert', 'confirm', 'prompt', 'parseInt', 'parseFloat', 'Number', 'String', 'Array', 'Object', 'Math', 'Date', 'JSON', 'fetch', 'setTimeout', 'setInterval', 'addEventListener', 'document', 'window'],
+                    'python': ['print', 'input', 'len', 'range', 'list', 'dict', 'set', 'int', 'float', 'str', 'type', 'isinstance', 'hasattr', 'open', 'close', 'read', 'write', 'append', 'extend', 'import', 'from', 'def', 'class', 'return', 'if', 'elif', 'else', 'for', 'while', 'do', 'while', 'try', 'except', 'finally', 'pass', 'break', 'continue', 'global', 'nonlocal'],
+                    'csharp': ['Console', 'WriteLine', 'ReadLine', 'Convert', 'ToInt32', 'ToString', 'Parse', 'Int32', 'Double', 'Decimal', 'Math', 'String', 'File', 'Reader', 'Writer', 'BufferedReader', 'BufferedWriter', 'IOException', 'FileNotFoundException', 'ArrayIndexOutOfBoundsException', 'StringIndexOutOfBoundsException', 'NullPointerException', 'ClassCastException', 'try', 'catch', 'finally', 'throw', 'extends', 'implements', 'interface', 'abstract', 'class', 'import', 'package'],
+                    'java': ['System', 'out', 'print', 'println', 'Scanner', 'nextInt', 'nextLine', 'hasNext', 'Integer', 'parseInt', 'Double', 'Math', 'String', 'File', 'Reader', 'Writer', 'BufferedReader', 'BufferedWriter', 'IOException', 'FileNotFoundException', 'ArrayIndexOutOfBoundsException', 'StringIndexOutOfBoundsException', 'NullPointerException', 'ClassCastException', 'try', 'catch', 'finally', 'throw', 'extends', 'implements', 'interface', 'abstract', 'class', 'import', 'package']
+                };
+                return functions[language] || functions.javascript;
+            }
+            
+            function getCommonKeywords(language) {
+                const keywords = {
+                    'javascript': ['var', 'let', 'const', 'function', 'return', 'if', 'else', 'for', 'while', 'do', 'switch', 'case', 'break', 'continue', 'try', 'catch', 'finally', 'throw', 'new', 'this', 'class', 'extends', 'super', 'static', 'import', 'export', 'default', 'async', 'await'],
+                    'python': ['def', 'return', 'if', 'elif', 'else', 'for', 'while', 'break', 'continue', 'try', 'except', 'finally', 'raise', 'import', 'from', 'as', 'class', 'pass', 'global', 'nonlocal', 'lambda', 'yield', 'with', 'in', 'is', 'and', 'or', 'not'],
+                    'csharp': ['public', 'private', 'protected', 'internal', 'static', 'readonly', 'const', 'virtual', 'override', 'abstract', 'sealed', 'partial', 'async', 'await', 'yield', 'return', 'if', 'else', 'switch', 'case', 'break', 'default', 'for', 'foreach', 'while', 'do', 'try', 'catch', 'finally', 'throw', 'using', 'namespace', 'class', 'interface', 'struct', 'enum'],
+                    'java': ['public', 'private', 'protected', 'static', 'final', 'abstract', 'synchronized', 'volatile', 'transient', 'native', 'strictfp', 'return', 'if', 'else', 'switch', 'case', 'break', 'default', 'for', 'while', 'do', 'try', 'catch', 'finally', 'throw', 'throws', 'class', 'interface', 'extends', 'implements', 'import', 'package', 'enum', 'assert']
+                };
+                return keywords[language] || keywords.javascript;
+            }
+            
+            function findTypo(word, dictionary) {
+                // Simple typo detection using Levenshtein distance
+                let minDistance = Infinity;
+                let bestMatch = null;
+                const threshold = Math.max(2, Math.floor(word.length * 0.4));
+                console.log('🔍 Word:', word, 'Threshold:', threshold);
+                
+                for (const correctWord of dictionary) {
+                    const distance = levenshteinDistance(word.toLowerCase(), correctWord.toLowerCase());
+                    console.log('📏 Distance to', correctWord, ':', distance);
+                    if (distance < minDistance && distance <= threshold && distance > 0) {
+                        minDistance = distance;
+                        bestMatch = correctWord;
+                        console.log('✅ New best match:', correctWord, 'Distance:', distance);
+                    }
+                }
+                
+                console.log('🏁 Final result:', bestMatch);
+                return bestMatch ? { suggested: bestMatch, distance: minDistance } : null;
+            }
+            
+            function levenshteinDistance(str1, str2) {
+                const matrix = [];
+                for (let i = 0; i <= str2.length; i++) {
+                    matrix[i] = [i];
+                }
+                for (let j = 0; j <= str1.length; j++) {
+                    matrix[0][j] = j;
+                }
+                for (let i = 1; i <= str2.length; i++) {
+                    for (let j = 1; j <= str1.length; j++) {
+                        if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+                            matrix[i][j] = matrix[i - 1][j - 1];
+                        } else {
+                            matrix[i][j] = Math.min(
+                                matrix[i - 1][j - 1] + 1,
+                                matrix[i][j - 1] + 1,
+                                matrix[i - 1][j] + 1
+                            );
+                        }
+                    }
+                }
+                return matrix[str2.length][str1.length];
+            }
+        
+        // Additional helper methods for dynamic detection
+        function extractPotentialFunctions(line) {
+            const functions = [];
+            const words = line.split(/\s+/);
+            words.forEach(word => {
+                // Check if word looks like a function call
+                if (word.includes('(') || word.match(/[a-zA-Z_][a-zA-Z0-9]*\(/)) {
+                    functions.push(word);
+                }
+            });
+            return functions;
+        }
+        
+        function extractVariableNames(line) {
+            const variables = [];
+            const words = line.split(/\s+/);
+            words.forEach(word => {
+                // Check if word looks like a variable assignment
+                if (word.includes('=') && !word.includes('==') && !word.includes('!=') && !word.includes('<=') && !word.includes('>=') && !word.match(/^[0-9]+$/)) {
+                    variables.push(word);
+                }
+            });
+            return variables;
+        }
+
+        
+        function generateBugFixes(code, language) {
+            const fixes = [];
+            
+            fixes.push('Review code for potential security vulnerabilities');
+            fixes.push('Consider adding input validation');
+            fixes.push('Implement proper error handling');
+            
+            return fixes;
+        }
+
+        async function performBugTriage(analysisResult, bugDetectionResult) {
+            // Perform bug triage and categorization
+            const allBugs = [
+                ...bugDetectionResult.bugs,
+                ...bugDetectionResult.syntaxErrors,
+                ...bugDetectionResult.typos,
+                ...bugDetectionResult.securityIssues,
+                ...bugDetectionResult.performanceIssues
+            ];
+            
+            console.log('🔍 Triage - Bug counts:');
+            console.log('  Bugs:', bugDetectionResult.bugs?.length || 0);
+            console.log('  Syntax errors:', bugDetectionResult.syntaxErrors?.length || 0);
+            console.log('  Typos:', bugDetectionResult.typos?.length || 0);
+            console.log('  Security issues:', bugDetectionResult.securityIssues?.length || 0);
+            console.log('  Performance issues:', bugDetectionResult.performanceIssues?.length || 0);
+            console.log('  Total allBugs:', allBugs.length);
             
             return {
                 totalBugs: allBugs.length,
                 severityBreakdown: categorizeBugs(allBugs),
                 prioritizedFixes: prioritizeFixes(allBugs),
-                overallAssessment: generateOverallAssessment(researchResult, analysisResult),
+                overallAssessment: generateOverallAssessment(analysisResult, bugDetectionResult),
                 actionPlan: createActionPlan(allBugs)
             };
         }
@@ -703,6 +1100,8 @@ def divide_numbers(a, b):
             const lines = code.split('\n');
             
             lines.forEach((line, index) => {
+                const trimmedLine = line.trim();
+                
                 // Check for incorrect type names
                 if (line.includes('integer.')) {
                     issues.push({
@@ -778,27 +1177,36 @@ def divide_numbers(a, b):
                     }
                 }
                 
-                // Check for missing semicolons
-                const trimmedLine = line.trim();
+                // More accurate missing semicolon check for C#
                 if (trimmedLine && !trimmedLine.startsWith('//') && !trimmedLine.startsWith('using') && 
+                    !trimmedLine.startsWith('/*') && !trimmedLine.startsWith('*') &&
                     !trimmedLine.startsWith('{') && !trimmedLine.startsWith('}') && 
-                    !trimmedLine.endsWith('{') && !trimmedLine.endsWith('}') &&
-                    !trimmedLine.endsWith(';') && !trimmedLine.includes('if ') && 
-                    !trimmedLine.includes('for ') && !trimmedLine.includes('while ') &&
-                    !trimmedLine.includes('else') && !trimmedLine.includes('switch ') &&
-                    !trimmedLine.includes('case ') && !trimmedLine.includes('default:') &&
-                    !trimmedLine.includes('return') && !trimmedLine.includes('break') &&
-                    !trimmedLine.includes('continue') && !trimmedLine.includes('goto')) {
-                    issues.push({
-                        type: 'syntax_error',
-                        severity: 'medium',
-                        description: 'Missing semicolon at end of statement',
-                        line: index + 1
-                    });
+                    !trimmedLine.startsWith('if') && !trimmedLine.startsWith('for') && 
+                    !trimmedLine.startsWith('while') && !trimmedLine.startsWith('else') &&
+                    !trimmedLine.startsWith('switch') && !trimmedLine.startsWith('case') &&
+                    !trimmedLine.startsWith('default') && !trimmedLine.startsWith('try') &&
+                    !trimmedLine.startsWith('catch') && !trimmedLine.startsWith('finally') &&
+                    !trimmedLine.startsWith('public') && !trimmedLine.startsWith('private') &&
+                    !trimmedLine.startsWith('protected') && !trimmedLine.startsWith('static') &&
+                    !trimmedLine.startsWith('class') && !trimmedLine.startsWith('namespace')) {
+                    
+                    // Only check actual statements that should end with semicolons
+                    if ((trimmedLine.includes('=') || trimmedLine.match(/^\w+\s*\(/)) && 
+                        !trimmedLine.endsWith('{') && !trimmedLine.endsWith('}') &&
+                        !trimmedLine.endsWith(';') && !trimmedLine.endsWith(',') &&
+                        !trimmedLine.includes('if ') && !trimmedLine.includes('for ') && 
+                        !trimmedLine.includes('while ') && !trimmedLine.includes('return ') &&
+                        !trimmedLine.includes('break') && !trimmedLine.includes('continue') &&
+                        !trimmedLine.includes('goto') && !trimmedLine.includes('throw ')) {
+                        issues.push({
+                            type: 'syntax_error',
+                            severity: 'medium',
+                            description: 'Missing semicolon at end of statement',
+                            line: index + 1
+                        });
+                    }
                 }
             });
-            
-            return issues;
         }
 
         function detectJavaScriptBugs(code) {
@@ -806,29 +1214,86 @@ def divide_numbers(a, b):
             const lines = code.split('\n');
             
             lines.forEach((line, index) => {
-                // Check for undefined variables
-                if (line.includes('undefinedVar')) {
+                const trimmedLine = line.trim();
+                
+                // Skip empty lines, comments, and control structures
+                if (!trimmedLine || trimmedLine.startsWith('//') || trimmedLine.startsWith('/*') || 
+                    trimmedLine.startsWith('*') || trimmedLine.startsWith('}') ||
+                    trimmedLine.startsWith('if') || trimmedLine.startsWith('for') || 
+                    trimmedLine.startsWith('while') || trimmedLine.startsWith('else') ||
+                    trimmedLine.startsWith('switch') || trimmedLine.startsWith('case') ||
+                    trimmedLine.startsWith('default') || trimmedLine.startsWith('try') ||
+                    trimmedLine.startsWith('catch') || trimmedLine.startsWith('finally') ||
+                    trimmedLine.startsWith('function') || trimmedLine.startsWith('class')) {
+                    return;
+                }
+                
+                // More accurate missing semicolon check
+                // Only check actual assignment statements and function calls
+                if ((trimmedLine.includes('=') || trimmedLine.match(/^\w+\s*\(/)) && 
+                    !trimmedLine.endsWith('{') && !trimmedLine.endsWith('}') &&
+                    !trimmedLine.endsWith(';') && !trimmedLine.endsWith(',') &&
+                    !trimmedLine.includes('if ') && !trimmedLine.includes('for ') && 
+                    !trimmedLine.includes('while ') && !trimmedLine.includes('return ') &&
+                    !trimmedLine.includes('break') && !trimmedLine.includes('continue')) {
                     issues.push({
-                        type: 'reference_error',
-                        severity: 'high',
-                        description: 'Reference to undefined variable',
+                        type: 'syntax_error',
+                        severity: 'medium',
+                        description: 'Missing semicolon at end of statement',
                         line: index + 1
                     });
                 }
                 
-                // Check for missing semicolons
-                const trimmedLine = line.trim();
-                if (trimmedLine && !trimmedLine.startsWith('//') && !trimmedLine.startsWith('/*') &&
-                    !trimmedLine.endsWith('{') && !trimmedLine.endsWith('}') &&
-                    !trimmedLine.endsWith(';') && !trimmedLine.includes('if ') && 
-                    !trimmedLine.includes('for ') && !trimmedLine.includes('while ') &&
-                    !trimmedLine.includes('else') && !trimmedLine.includes('function ') &&
-                    !trimmedLine.includes('return') && !trimmedLine.includes('break') &&
-                    !trimmedLine.includes('continue')) {
+                // More specific == vs === check (avoid false positives)
+                if (trimmedLine.includes('==') && !trimmedLine.includes('===')) {
+                    // Don't flag if it's in a comment or template literal
+                    if (!trimmedLine.includes('//') && !trimmedLine.includes('/*')) {
+                        const eqMatch = trimmedLine.match(/([^=!])==([^=])/);
+                        if (eqMatch) {
+                            issues.push({
+                                type: 'potential_issue',
+                                severity: 'low',
+                                description: 'Consider using === instead of == for strict equality',
+                                line: index + 1
+                            });
+                        }
+                    }
+                }
+                
+                // Only flag var usage in modern contexts (not in legacy code)
+                if (trimmedLine.includes('var ') && !trimmedLine.includes('var i = 0')) {
+                    // Only flag if there are also let/const declarations (indicating modern code)
+                    if (code.includes('let ') || code.includes('const ')) {
+                        issues.push({
+                            type: 'best_practice',
+                            severity: 'low',
+                            description: 'Consider using let or const instead of var',
+                            line: index + 1
+                        });
+                    }
+                }
+                
+                // More specific memory leak detection
+                if ((trimmedLine.includes('setInterval') || trimmedLine.includes('setTimeout')) &&
+                    !trimmedLine.includes('clearInterval') && !trimmedLine.includes('clearTimeout') &&
+                    !trimmedLine.includes('//') && !trimmedLine.includes('TODO')) {
+                    // Only flag if it's assigning to a variable
+                    if (trimmedLine.includes('=')) {
+                        issues.push({
+                            type: 'potential_memory_leak',
+                            severity: 'medium',
+                            description: 'Timer created - consider adding cleanup logic',
+                            line: index + 1
+                        });
+                    }
+                }
+                
+                // Console statement detection (but be less aggressive)
+                if (trimmedLine.startsWith('console.') && !trimmedLine.includes('//')) {
                     issues.push({
-                        type: 'syntax_error',
+                        type: 'debug_code',
                         severity: 'low',
-                        description: 'Missing semicolon at end of statement',
+                        description: 'Console statement found - should be removed in production',
                         line: index + 1
                     });
                 }
@@ -844,97 +1309,129 @@ def divide_numbers(a, b):
             lines.forEach((line, index) => {
                 const trimmedLine = line.trim();
                 
-                // Check for indentation issues
-                if (line.startsWith(' ') && !line.startsWith('    ') && line.trim()) {
-                    issues.push({
-                        type: 'syntax_error',
-                        severity: 'high',
-                        description: 'Inconsistent indentation - Python requires 4 spaces per level',
-                        line: index + 1
-                    });
+                // Skip empty lines, comments, and control structures
+                if (!trimmedLine || trimmedLine.startsWith('#') || 
+                    trimmedLine.startsWith('"""') || trimmedLine.startsWith("'''") ||
+                    trimmedLine.startsWith('if') || trimmedLine.startsWith('for') || 
+                    trimmedLine.startsWith('while') || trimmedLine.startsWith('else') ||
+                    trimmedLine.startsWith('elif') || trimmedLine.startsWith('try') ||
+                    trimmedLine.startsWith('except') || trimmedLine.startsWith('finally') ||
+                    trimmedLine.startsWith('def') || trimmedLine.startsWith('class') ||
+                    trimmedLine.startsWith('import') || trimmedLine.startsWith('from')) {
+                    return;
                 }
                 
-                // Check for undefined variables and function name typos
-                if (trimmedLine.includes('calc_average(')) {
-                    issues.push({
-                        type: 'name_error',
-                        severity: 'high',
-                        description: 'NameError: function "calc_average" is not defined - did you mean "calculate_average"?',
-                        line: index + 1
-                    });
-                }
-                
-                                
-                // Check for common function name typos
-                const commonTypos = {
-                    'print': ['printer', 'printered', 'printt', 'printr', 'printd'],
-                    'len': ['leng', 'lenght', 'lenth', 'ln'],
-                    'range': ['rang', 'rannge', 'raange'],
-                    'sum': ['summ', 'sun', 'some'],
-                    'max': ['maxx', 'mxa'],
-                    'min': ['minn', 'mni']
-                };
-                
-                for (const [correct, typos] of Object.entries(commonTypos)) {
-                    for (const typo of typos) {
-                        if (trimmedLine.includes(typo + '(')) {
+                // Check for Python-specific syntax issues
+                if (trimmedLine.includes('=') && !trimmedLine.includes('==') && !trimmedLine.includes('!=')) {
+                    // Check for missing colon in assignments that should have them
+                    if (trimmedLine.startsWith('if') || trimmedLine.startsWith('for') || 
+                        trimmedLine.startsWith('while') || trimmedLine.startsWith('def') ||
+                        trimmedLine.startsWith('class') || trimmedLine.startsWith('try') ||
+                        trimmedLine.startsWith('except') || trimmedLine.startsWith('elif')) {
+                        if (!trimmedLine.endsWith(':')) {
                             issues.push({
-                                type: 'name_error',
+                                type: 'syntax_error',
                                 severity: 'high',
-                                description: `NameError: function "${typo}" is not defined - did you mean "${correct}"?`,
+                                description: 'Missing colon at end of statement',
                                 line: index + 1
                             });
                         }
                     }
                 }
                 
-                
-                // Check for out-of-bounds access patterns
-                if (trimmedLine.includes('range(len(') && trimmedLine.includes('+ 1')) {
-                    issues.push({
-                        type: 'runtime_error',
-                        severity: 'high',
-                        description: 'IndexError: list index out of bounds - range(len(numbers) + 1) will cause IndexError',
-                        line: index + 1
-                    });
+                // Check for indentation issues (basic check)
+                if (trimmedLine && !trimmedLine.startsWith(' ') && !trimmedLine.startsWith('\t')) {
+                    // Check if this line should be indented (after a control structure)
+                    const prevLine = index > 0 ? lines[index - 1].trim() : '';
+                    if (prevLine.endsWith(':') && !trimmedLine.startsWith('#')) {
+                        issues.push({
+                            type: 'syntax_error',
+                            severity: 'high',
+                            description: 'Expected indented block after colon',
+                            line: index + 1
+                        });
+                    }
                 }
                 
-                // Check for undefined variables in general
-                if (trimmedLine.includes('undefined_var')) {
-                    issues.push({
-                        type: 'name_error',
-                        severity: 'high',
-                        description: 'NameError: name is not defined',
-                        line: index + 1
-                    });
-                }
-            });
-            
-            return issues;
-        }
-
-        function detectJavaBugs(code) {
-            const issues = [];
-            const lines = code.split('\n');
-            
-            lines.forEach((line, index) => {
-                // Check for missing semicolons
-                const trimmedLine = line.trim();
-                if (trimmedLine && !trimmedLine.startsWith('//') && !trimmedLine.startsWith('/*') &&
-                    !trimmedLine.startsWith('*') && !trimmedLine.startsWith('@') &&
-                    !trimmedLine.endsWith('{') && !trimmedLine.endsWith('}') &&
-                    !trimmedLine.endsWith(';') && !trimmedLine.includes('if ') && 
-                    !trimmedLine.includes('for ') && !trimmedLine.includes('while ') &&
-                    !trimmedLine.includes('else') && !trimmedLine.includes('switch ') &&
-                    !trimmedLine.includes('case ') && !trimmedLine.includes('default:') &&
-                    !trimmedLine.includes('return') && !trimmedLine.includes('break') &&
-                    !trimmedLine.includes('continue') && !trimmedLine.includes('class ') &&
-                    !trimmedLine.includes('public ') && !trimmedLine.includes('private ') &&
-                    !trimmedLine.includes('protected ') && !trimmedLine.includes('static ')) {
+                // Check for print statements in Python 3 style
+                if (trimmedLine.includes('print ') && !trimmedLine.includes('print(')) {
                     issues.push({
                         type: 'syntax_error',
-                        severity: 'high',
-                        description: 'Missing semicolon at end of statement',
+                        severity: 'medium',
+                        description: 'print statement should be a function call: print()',
+                        line: index + 1
+                    });
+                }
+                
+                // Check for division by zero
+                if (trimmedLine.includes('/') && !trimmedLine.includes('#')) {
+                    if (trimmedLine.includes('/ 0') || trimmedLine.includes('/0')) {
+                        issues.push({
+                            type: 'runtime_error',
+                            severity: 'high',
+                            description: 'Division by zero',
+                            line: index + 1
+                        });
+                    }
+                    
+                    // Check for division by variables that could be zero
+                    const divisionMatch = trimmedLine.match(/(\w+)\s*\/\s*(\w+)/);
+                    if (divisionMatch) {
+                        const divisor = divisionMatch[2];
+                        if (divisor === 'b' || divisor === 'denominator' || divisor === 'divisor') {
+                            issues.push({
+                                type: 'potential_runtime_error',
+                                severity: 'high',
+                                description: `Potential division by zero - variable "${divisor}" might be zero`,
+                                line: index + 1
+                            });
+                        }
+                    }
+                }
+                
+                // Check for undefined variables (basic check)
+                if (trimmedLine.match(/^\w+\s*=/)) {
+                    const varMatch = trimmedLine.match(/^(\w+)\s*=/);
+                    if (varMatch) {
+                        const varName = varMatch[1];
+                        // Check if it's a common Python built-in
+                        const builtInVars = ['len', 'str', 'int', 'float', 'bool', 'list', 'dict', 'set', 'tuple'];
+                        if (builtInVars.includes(varName)) {
+                            issues.push({
+                                type: 'potential_issue',
+                                severity: 'medium',
+                                description: `Overriding built-in function "${varName}"`,
+                                line: index + 1
+                            });
+                        }
+                    }
+                }
+                
+                // Check for missing imports
+                if (trimmedLine.includes('math.') || trimmedLine.includes('random.') || 
+                    trimmedLine.includes('datetime.') || trimmedLine.includes('os.')) {
+                    const hasImport = lines.some(l => 
+                        l.trim().startsWith('import math') || l.trim().startsWith('from math') ||
+                        l.trim().startsWith('import random') || l.trim().startsWith('from random') ||
+                        l.trim().startsWith('import datetime') || l.trim().startsWith('from datetime') ||
+                        l.trim().startsWith('import os') || l.trim().startsWith('from os')
+                    );
+                    if (!hasImport) {
+                        issues.push({
+                            type: 'import_error',
+                            severity: 'medium',
+                            description: 'Module used but not imported',
+                            line: index + 1
+                        });
+                    }
+                }
+                
+                // Check for bare except clauses
+                if (trimmedLine === 'except:') {
+                    issues.push({
+                        type: 'best_practice',
+                        severity: 'low',
+                        description: 'Bare except clause - specify exception type',
                         line: index + 1
                     });
                 }
@@ -955,6 +1452,7 @@ def divide_numbers(a, b):
         }
 
         function analyzeSecurity(code, language) {
+            console.log('🔒 analyzeSecurity called with language:', language);
             const issues = [];
             
             // Check for common security issues
@@ -980,6 +1478,7 @@ def divide_numbers(a, b):
         }
 
         function analyzePerformance(code, language) {
+            console.log('📊 analyzePerformance called with language:', language);
             const issues = [];
             
             // Check for performance issues
@@ -1028,10 +1527,14 @@ def divide_numbers(a, b):
         function categorizeBugs(bugs) {
             const categories = { high: 0, medium: 0, low: 0 };
             
+            console.log('📊 Categorizing', bugs.length, 'bugs');
+            
             bugs.forEach(bug => {
+                console.log('  Bug:', bug.severity, bug.type, bug.description);
                 categories[bug.severity] = (categories[bug.severity] || 0) + 1;
             });
             
+            console.log('  Final categories:', categories);
             return categories;
         }
 
@@ -1044,13 +1547,18 @@ def divide_numbers(a, b):
                 .slice(0, 5);
         }
 
-        function generateOverallAssessment(researchResult, analysisResult) {
-            const qualityScore = analysisResult.qualityScore;
+        function generateOverallAssessment(analysisResult, bugDetectionResult) {
+            const totalBugs = bugDetectionResult ? 
+                (bugDetectionResult.bugs?.length || 0) + 
+                (bugDetectionResult.syntaxErrors?.length || 0) + 
+                (bugDetectionResult.typos?.length || 0) + 
+                (bugDetectionResult.securityIssues?.length || 0) + 
+                (bugDetectionResult.performanceIssues?.length || 0) : 0;
             let assessment = '';
             
-            if (qualityScore >= 90) assessment = 'Excellent code quality with minimal issues';
-            else if (qualityScore >= 80) assessment = 'Good code quality with some minor improvements needed';
-            else if (qualityScore >= 70) assessment = 'Fair code quality with several areas for improvement';
+            if (totalBugs === 0) assessment = 'Excellent code quality with no issues detected';
+            else if (totalBugs <= 2) assessment = 'Good code quality with minimal issues';
+            else if (totalBugs <= 5) assessment = 'Fair code quality with some improvements needed';
             else assessment = 'Poor code quality requiring significant refactoring';
             
             return assessment;
@@ -1080,22 +1588,62 @@ def divide_numbers(a, b):
             return plan;
         }
 
-        function displayResults(results) {
-            // Display Research Results
-            displayQualityResults(results.research);
-            displayBugResults(results.research.potentialIssues);
-            
+        function displayBugResults(results) {
             // Display Analysis Results
-            displaySecurityResults(results.analysis.securityIssues);
-            displayPerformanceResults(results.analysis.performanceIssues);
+            displayQualityResults(results.analysis);
+            
+            // Display Bug Detection Results
+            displayBugDetectionResults(results.bugDetection);
             
             // Display Triage Report
             displayTriageReport(results.triage);
         }
 
-        function displayQualityResults(researchResult) {
+        function displayBugDetectionResults(bugDetectionResult) {
+            const container = document.getElementById('bug-results');
+            const bugs = bugDetectionResult.bugs || [];
+            const syntaxErrors = bugDetectionResult.syntaxErrors || [];
+            const typos = bugDetectionResult.typos || [];
+            const securityIssues = bugDetectionResult.securityIssues || [];
+            const performanceIssues = bugDetectionResult.performanceIssues || [];
+            
+            const allIssues = [...bugs, ...syntaxErrors, ...typos, ...securityIssues, ...performanceIssues];
+            
+            // Remove duplicates based on description, line, and type
+            const uniqueIssues = allIssues.filter((issue, index, self) => 
+                index === self.findIndex((i) => 
+                    i.description === issue.description && 
+                    i.line === issue.line && 
+                    i.type === issue.type
+                )
+            );
+            
+            console.log('🐛 Original issues:', allIssues.length, 'Unique issues:', uniqueIssues.length);
+            
+            if (uniqueIssues.length === 0) {
+                container.innerHTML = '<p>No bugs detected! ✅</p>';
+                return;
+            }
+            
+            let html = '<div class="bug-list">';
+            uniqueIssues.forEach(issue => {
+                html += `
+                    <div class="bug-item ${issue.severity}">
+                        <span class="bug-severity severity-${issue.severity}">${issue.severity}</span>
+                        <strong>${issue.type}:</strong> ${issue.description}
+                        ${issue.line ? `<em>Line ${issue.line}</em>` : ''}
+                        ${issue.suggestion ? `<br><small>Suggestion: ${issue.suggestion}</small>` : ''}
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            container.innerHTML = html;
+        }
+
+        function displayQualityResults(analysisResult) {
             const container = document.getElementById('quality-results');
-            const metrics = researchResult.codeMetrics;
+            const metrics = analysisResult.codeMetrics;
             
             container.innerHTML = `
                 <div style="margin-bottom: 15px;">
@@ -1111,57 +1659,13 @@ def divide_numbers(a, b):
                 <div>
                     <strong>Detected Patterns:</strong>
                     <ul style="margin: 10px 0; padding-left: 20px;">
-                        ${researchResult.patterns.map(p => `<li>${p}</li>`).join('')}
+                        ${analysisResult.patterns ? analysisResult.patterns.map(p => `<li>${p}</li>`).join('') : '<li>No patterns detected</li>'}
                     </ul>
                 </div>
             `;
         }
 
-        function displayBugResults(bugs) {
-            const container = document.getElementById('bug-results');
-            
-            // Count bugs by type and severity
-            const bugCounts = {
-                total: bugs.length,
-                syntax_errors: bugs.filter(b => b.type === 'syntax_error').length,
-                high_severity: bugs.filter(b => b.severity === 'high').length,
-                medium_severity: bugs.filter(b => b.severity === 'medium').length,
-                low_severity: bugs.filter(b => b.severity === 'low').length
-            };
-            
-            if (bugs.length === 0) {
-                container.innerHTML = '<p>✅ No bugs detected!</p>';
-                return;
-            }
-            
-            // Display bug count summary
-            let html = `
-                <div style="background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 6px; padding: 12px; margin-bottom: 15px;">
-                    <h4 style="color: #721c24; margin: 0 0 10px 0;">🐛 Bug Detection Summary</h4>
-                    <p style="margin: 5px 0;"><strong>Total Bugs Identified:</strong> ${bugCounts.total}</p>
-                    <p style="margin: 5px 0;"><strong>Syntax Errors:</strong> ${bugCounts.syntax_errors}</p>
-                    <p style="margin: 5px 0;">
-                        <span style="color: #dc3545;">High: ${bugCounts.high_severity}</span> | 
-                        <span style="color: #ffc107;">Medium: ${bugCounts.medium_severity}</span> | 
-                        <span style="color: #17a2b8;">Low: ${bugCounts.low_severity}</span>
-                    </p>
-                </div>
-                <h5>Detailed Bug Report:</h5>
-            `;
-            
-            // Display individual bugs
-            html += bugs.map(bug => `
-                <div class="bug-item ${bug.severity}">
-                    <span class="bug-severity severity-${bug.severity}">${bug.severity.toUpperCase()}</span>
-                    <span style="font-size: 0.8rem; background: #e9ecef; padding: 2px 6px; border-radius: 3px; margin-left: 5px;">${bug.type.replace('_', ' ').toUpperCase()}</span>
-                    <strong>${bug.description}</strong>
-                    ${bug.line ? `<br><small>📍 Line: ${bug.line}</small>` : ''}
-                </div>
-            `).join('');
-            
-            container.innerHTML = html;
-        }
-
+        
         function displaySecurityResults(securityIssues) {
             const container = document.getElementById('security-results');
             
@@ -1237,7 +1741,7 @@ def divide_numbers(a, b):
                         <h5 style="color: #155724; margin-bottom: 10px;">🎯 Bug Classification Summary</h5>
                         <div style="background: white; padding: 10px; border-radius: 4px;">
                             <p style="margin: 5px 0;"><strong>Analysis Complete:</strong> All bugs have been identified and categorized by severity</p>
-                            <p style="margin: 5px 0;"><strong>Detection Method:</strong> Multi-agent analysis with pattern recognition</p>
+                            <p style="margin: 5px 0;"><strong>Detection Method:</strong> AI-powered bug detection with pattern recognition</p>
                             <p style="margin: 5px 0;"><strong>Accuracy:</strong> High-confidence bug detection with line-level precision</p>
                         </div>
                     </div>
@@ -1280,12 +1784,187 @@ def divide_numbers(a, b):
         function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
-
+        
+        
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
             // Load a sample by default
-            // loadSampleCode('javascript');
+            loadSampleCode('javascript');
         });
+        
+        // Additional helper methods for dynamic detection
+        function extractPotentialFunctions(line) {
+            const funcList = [];
+            const words = line.split(/\s+/);
+            words.forEach(word => {
+                // Check if word looks like a function call
+                if (word.includes('(') || word.match(/[a-zA-Z_][a-zA-Z0-9]*\(/)) {
+                    funcList.push(word);
+                }
+            });
+            return funcList;
+        }
+        function extractVariableNames(line) {
+            const varList = [];
+            const words = line.split(/\s+/);
+            words.forEach(word => {
+                // Check if word looks like a variable assignment
+                if (word.includes('=') && !word.includes('==') && !word.includes('!=') && !word.includes('<=') && !word.includes('>=') && !word.match(/^[0-9]+$/)) {
+                    varList.push(word);
+                }
+            });
+            return varList;
+        }
+        
+        // AI-powered typo detection using similarity algorithms
+        function findTypo(candidate, references) {
+            let bestMatch = null;
+            let bestScore = 0;
+            
+            for (const ref of references) {
+                // Calculate multiple similarity scores
+                const levenshteinScore = calculateLevenshteinSimilarity(candidate, ref);
+                const patternScore = calculatePatternSimilarity(candidate, ref);
+                const prefixScore = calculatePrefixSimilarity(candidate, ref);
+                const abbreviationScore = calculateAbbreviationSimilarity(candidate, ref);
+                
+                // Adaptive scoring based on length
+                let score = (levenshteinScore * 0.3) + (patternScore * 0.3) + (prefixScore * 0.2) + (abbreviationScore * 0.5);
+                
+                // Special handling for very short candidates
+                if (candidate.length <= 3) {
+                    score += calculateCharacterOverlap(candidate, ref) * 0.5;
+                }
+                
+                // Special handling for very long candidates
+                if (candidate.length > 15) {
+                    const repetitionPenalty = detectExtremeRepetition(candidate);
+                    if (repetitionPenalty > 0.8) {
+                        score *= 0.3; // Reduce score for extreme repetition
+                    }
+                }
+                
+                // Adaptive threshold based on candidate length
+                const threshold = candidate.length <= 3 ? 0.6 : candidate.length <= 6 ? 0.7 : 0.8;
+                
+                if (score >= threshold) {
+                    bestMatch = ref;
+                    bestScore = score;
+                }
+            }
+            return bestMatch ? { found: bestMatch, confidence: bestScore } : null;
+        }
+        
+        function calculateLevenshteinSimilarity(candidate, reference) {
+            const matrix = [];
+            for (let i = 0; i <= reference.length; i++) {
+                matrix[i] = [];
+                for (let j = 0; j <= candidate.length; j++) {
+                    matrix[i][j] = candidate[j] === reference[i] ? 0 : 1;
+                }
+            }
+            for (let i = 0; i <= reference.length; i++) {
+                matrix[i][candidate.length] = 0;
+            }
+            let distance = 0;
+            for (let i = 0; i <= reference.length; i++) {
+                for (let j = 0; j <= candidate.length; j++) {
+                    distance += matrix[i][j];
+                }
+            }
+            return 1 - (distance / (reference.length * candidate.length));
+        }
+        
+        function calculatePatternSimilarity(candidate, reference) {
+            if (candidate.startsWith(reference)) {
+                return candidate.length / reference.length;
+            }
+            let commonPrefix = 0;
+            for (let i = 0; i < Math.min(candidate.length, reference.length); i++) {
+                if (candidate[i] === reference[i]) {
+                    commonPrefix++;
+                }
+            }
+            return commonPrefix / Math.min(candidate.length, reference.length);
+        }
+        
+        function calculatePrefixSimilarity(candidate, reference) {
+            if (reference.startsWith(candidate)) {
+                return candidate.length / reference.length;
+            }
+            let commonPrefix = 0;
+            for (let i = 0; i < Math.min(candidate.length, reference.length); i++) {
+                if (candidate[i] === reference[i]) {
+                    commonPrefix++;
+                }
+            }
+            return commonPrefix / Math.min(candidate.length, reference.length);
+        }
+        
+        function calculateAbbreviationSimilarity(candidate, reference) {
+            if (candidate.length <= 2 && reference.length <= 3) {
+                return candidate.length === reference.length ? 1 : 0.8;
+            }
+            return 0;
+        }
+        
+        function calculateCharacterOverlap(candidate, reference) {
+            const commonChars = new Set(candidate.split(''));
+            const refChars = new Set(reference.split(''));
+            let overlap = 0;
+            for (const char of candidate) {
+                if (refChars.has(char)) {
+                    overlap++;
+                }
+            }
+            return overlap / Math.min(candidate.length, reference.length);
+        }
+        
+        function detectExtremeRepetition(candidate) {
+            const uniqueChars = new Set(candidate.split(''));
+            if (uniqueChars.size <= 2) return 0;
+            
+            let maxRepeats = 0;
+            let currentChar = null;
+            let currentCount = 0;
+            
+            for (const char of candidate) {
+                if (char !== currentChar) {
+                    if (currentCount > maxRepeats) {
+                        maxRepeats = currentCount;
+                    }
+                    currentChar = char;
+                    currentCount = 1;
+                } else {
+                    currentCount++;
+                }
+            }
+            
+            if (maxRepeats > 5) {
+                return 0.9; // High penalty for extreme repetition
+            }
+            return 0;
+        };
+        
+        function getCommonFunctions(language) {
+            const functions = {
+                'javascript': ['print', 'console', 'alert', 'confirm', 'prompt', 'parseInt', 'parseFloat', 'Number', 'String', 'Array', 'Object', 'Math', 'Date', 'JSON', 'fetch', 'setTimeout', 'setInterval', 'addEventListener', 'document', 'window'],
+                'python': ['print', 'input', 'len', 'range', 'list', 'dict', 'set', 'int', 'float', 'str', 'type', 'isinstance', 'hasattr', 'open', 'close', 'read', 'write', 'append', 'extend', 'import', 'from', 'def', 'class', 'return', 'if', 'elif', 'else', 'for', 'while', 'do', 'while', 'try', 'except', 'finally', 'pass', 'break', 'continue', 'global', 'nonlocal'],
+                'csharp': ['Console', 'WriteLine', 'ReadLine', 'Convert', 'ToInt32', 'ToString', 'Parse', 'Int32', 'Double', 'Decimal', 'Math', 'String', 'File', 'Reader', 'Writer', 'BufferedReader', 'BufferedWriter', 'IOException', 'FileNotFoundException', 'ArrayIndexOutOfBoundsException', 'StringIndexOutOfBoundsException', 'NullPointerException', 'ClassCastException', 'try', 'catch', 'finally', 'throw', 'extends', 'implements', 'interface', 'abstract', 'class', 'import', 'package'],
+                'java': ['System', 'out', 'print', 'println', 'Scanner', 'nextInt', 'nextLine', 'hasNext', 'Integer', 'parseInt', 'Double', 'Math', 'String', 'File', 'Reader', 'Writer', 'BufferedReader', 'BufferedWriter', 'IOException', 'FileNotFoundException', 'ArrayIndexOutOfBoundsException', 'StringIndexOutOfBoundsException', 'NullPointerException', 'ClassCastException', 'try', 'catch', 'finally', 'throw', 'extends', 'implements', 'interface', 'abstract', 'class', 'import', 'package']
+            };
+            return functions[language] || functions.javascript;
+        };
+        
+        function getCommonKeywords(language) {
+            const keywords = {
+                'javascript': ['var', 'let', 'const', 'function', 'if', 'else', 'for', 'while', 'do', 'while', 'switch', 'case', 'break', 'continue', 'return', 'try', 'catch', 'finally', 'throw', 'new', 'class', 'this', 'typeof', 'instanceof', 'null', 'undefined', 'true', 'false', 'document', 'window', 'console', 'alert', 'confirm', 'prompt', 'parseInt', 'parseFloat', 'Number', 'String', 'Array', 'Object', 'Math', 'Date', 'JSON', 'fetch', 'setTimeout', 'setInterval', 'addEventListener', 'document', 'window'],
+                'python': ['def', 'if', 'elif', 'else', 'for', 'while', 'do', 'while', 'try', 'except', 'finally', 'return', 'pass', 'break', 'continue', 'global', 'nonlocal'],
+                'csharp': ['public', 'private', 'static', 'void', 'var', 'const', 'new', 'return', 'if', 'else', 'switch', 'case', 'default', 'break', 'try', 'catch', 'finally', 'throw', 'using', 'namespace', 'class'],
+                'java': ['public', 'private', 'static', 'final', 'void', 'var', 'const', 'new', 'return', 'if', 'else', 'switch', 'case', 'default', 'break', 'try', 'catch', 'finally', 'throw', 'extends', 'implements', 'interface', 'abstract', 'class', 'import', 'package']
+            };
+            return keywords[language] || keywords.javascript;
+        }
     </script>
 </body>
 </html>

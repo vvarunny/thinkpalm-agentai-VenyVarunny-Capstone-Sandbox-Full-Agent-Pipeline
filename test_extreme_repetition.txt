@@ -1,0 +1,24 @@
+// Test cases for extreme repetition detection
+
+printttttttttttttttttttttttttttt("Hello");    // Should detect as typo for "print"
+printtttttttttttttttttttttttttttttt("World");  // Should detect as typo for "print"
+printnnnnnnnnnnnnnnnnnnnnnnnnnnnnn("Test");     // Should detect as typo for "print"
+printaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa("Another");  // Should detect as typo for "print"
+
+// Other extreme repetition examples
+consoleeeeeeeeeeeeeeeeeeeeeeeeeeeee.log("Test"); // Should detect as typo for "console.log"
+alerttttttttttttttttttttttttttttttttt("Alert"); // Should detect as typo for "alert"
+parseIntttttttttttttttttttttttttttttttt("123"); // Should detect as typo for "parseInt"
+
+// Python examples
+printttttttttttttttttttttttttttttttt("Python"); // Should detect as typo for "print"
+lennnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn([1,2,3]);   // Should detect as typo for "len"
+rangggggggggggggggggggggggggggggggg(5);         // Should detect as typo for "range"
+
+// C# examples
+ConsoleWriteLineLineLineLineLineLineLine("C#");   // Should detect as typo for "WriteLine"
+ParseParseParseParseParseParseParseParse("123");   // Should detect as typo for "Parse"
+
+// Mixed patterns
+printxyxyxyxyxyxyxyxyxyxyxyxyxyxyxy("Pattern");   // Should detect as typo for "print"
+printababababababababababababababab("Another");    // Should detect as typo for "print"
