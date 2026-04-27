@@ -1363,6 +1363,27 @@ def divide_numbers(a, b):
                     });
                 }
                 
+                // Check for function name typos
+                if (trimmedLine.includes('(')) {
+                    const functionMatch = trimmedLine.match(/(\w+)\s*\(/);
+                    if (functionMatch) {
+                        const functionName = functionMatch[1];
+                        console.log('🔍 Python checking function:', functionName);
+                        const pythonFunctions = getCommonFunctions('python');
+                        const typo = findTypo(functionName, pythonFunctions);
+                        console.log('🐛 Python typo result for', functionName, ':', typo);
+                        if (typo) {
+                            issues.push({
+                                type: 'syntax',
+                                severity: 'medium',
+                                description: `Function name typo: "${functionName}" should be "${typo.suggested}"`,
+                                line: index + 1,
+                                suggestion: `Change "${functionName}" to "${typo.suggested}"`
+                            });
+                        }
+                    }
+                }
+                
                 // Check for division by zero
                 if (trimmedLine.includes('/') && !trimmedLine.includes('#')) {
                     if (trimmedLine.includes('/ 0') || trimmedLine.includes('/0')) {
