@@ -87,87 +87,76 @@ npm start
 
 ### API Usage
 
-#### Submit Code for Analysis
+#### Submit Code for Review
 ```bash
-curl -X POST http://localhost:3000/api/tasks \
+curl -X POST http://localhost:3000/api/code-review \
   -H "Content-Type: application/json" \
   -d '{
-    "task": {
-      "type": "analysis",
-      "parameters": {
-        "code": "console.log('Hello World');",
-        "language": "javascript"
-      }
-    },
-    "priority": "high"
+    "code": "console.log('Hello World');",
+    "language": "javascript",
+    "analysis_type": "full"
   }'
 ```
 
-#### Execute Code Analysis Workflow
+#### Quick Bug Detection
 ```bash
-curl -X POST http://localhost:3000/api/workflows \
+curl -X POST http://localhost:3000/api/bugs/detect \
   -H "Content-Type: application/json" \
   -d '{
-    "workflow": {
-      "type": "code_review",
-      "steps": [
-        {
-          "name": "syntax_check",
-          "type": "agent_task",
-          "agent_id": "analysis-001",
-          "task_type": "analysis",
-          "parameters": {"analysis_type": "syntax"}
-        },
-        {
-          "name": "security_scan",
-          "type": "agent_task", 
-          "agent_id": "research-001",
-          "task_type": "security_analysis",
-          "parameters": {"scan_type": "vulnerabilities"}
-        }
-      ]
-    }
+    "code": "def phgjhmrint(text): print(text)",
+    "language": "python",
+    "severity_threshold": "medium"
   }'
 ```
 
-#### Send Message to Agent
+#### Get Security Analysis
 ```bash
-curl -X POST http://localhost:3000/api/agents/research-001/message \
+curl -X POST http://localhost:3000/api/security/scan \
   -H "Content-Type: application/json" \
   -d '{
-    "type": "research_request",
-    "content": {
-      "query": "machine learning applications",
-      "sources": 5
-    }
+    "code": "SELECT * FROM users WHERE id = " + userInput",
+    "language": "sql",
+    "scan_types": ["sql_injection", "xss"]
+  }'
+```
+
+#### Code Quality Assessment
+```bash
+curl -X POST http://localhost:3000/api/quality/assess \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "for(var i=0;i<10;i++){console.log(i)}",
+    "language": "javascript",
+    "metrics": ["complexity", "maintainability", "performance"]
   }'
 ```
 
 ## 🏗️ Architecture
 
-### Memory System
-- SQLite database for persistent storage
-- Agent-specific memory isolation
-- Search and recall capabilities
-- State persistence across sessions
+### Code Analysis Engine
+- Multi-language syntax parsing
+- Pattern recognition algorithms
+- Real-time bug detection
+- Cross-language vulnerability scanning
 
-### Tool Registry
-- Modular tool system
-- Parameter validation
-- Error handling and logging
-- Extensible architecture
+### Bug Detection System
+- Static code analysis
+- Runtime error prediction
+- Security vulnerability scanning
+- Performance issue identification
+- Typo and syntax error detection
 
-### Agent Communication
-- Event-driven messaging
-- WebSocket real-time updates
-- Message routing and filtering
-- Cross-agent coordination
+### Quality Assessment Framework
+- Code complexity metrics
+- Maintainability scoring
+- Best practices validation
+- Performance benchmarking
 
-### Pipeline Execution
-- Priority-based task queuing
-- Concurrent execution with limits
-- Workflow orchestration
-- Progress tracking and monitoring
+### Review Pipeline
+- Multi-stage analysis workflow
+- Priority-based bug triage
+- Automated severity classification
+- Real-time progress tracking
 
 ## 🧪 Demo Scenarios
 
@@ -225,11 +214,13 @@ Each agent can be configured with:
 ## 📊 Monitoring
 
 ### Metrics Available
-- Agent status and performance
-- Task execution statistics
-- Workflow success rates
-- Memory usage
-- Error rates and types
+- Bug detection accuracy rates
+- Code quality scores
+- Security vulnerability findings
+- Performance issue identification
+- Language-specific analysis statistics
+- False positive rates
+- Review processing times
 
 ### Real-time Updates
 - WebSocket connections for live updates
@@ -242,26 +233,29 @@ Each agent can be configured with:
 ### Project Structure
 ```
 src/
-├── agents/          # Agent implementations
-├── memory/          # Memory system
-├── tools/           # Tool registry
-├── pipeline/        # Task queue and pipeline
-├── ui/              # React web interface
-├── demo/            # Demo scenarios
-└── server.js        # Main server
+├── agents/          # AI agents for code analysis and bug detection
+├── memory/          # Memory system for persistent analysis storage
+├── tools/           # Tool registry for analysis utilities
+├── pipeline/        # Task queue and workflow orchestration
+├── ui/              # Web-based code review interface
+├── demo/            # Demo scenarios and test cases
+├── index.js         # Main application entry point
+└── server.js        # HTTP server and API endpoints
 ```
 
-### Adding New Agents
-1. Extend `BaseAgent` class
-2. Implement required methods
-3. Register with pipeline
-4. Add UI components if needed
+### Adding New Language Support
+1. Create new agent in `src/agents/` for the language
+2. Add language-specific detection logic to the agent
+3. Update UI language selector in `src/ui/`
+4. Add demo test cases in `src/demo/`
+5. Register agent with the pipeline system
 
-### Adding New Tools
-1. Implement tool interface
-2. Register with `ToolRegistry`
-3. Add parameter validation
-4. Test with agents
+### Adding New Bug Detectors
+1. Implement detection logic in appropriate agent in `src/agents/`
+2. Add any required analysis tools to `src/tools/`
+3. Create test scenarios in `src/demo/`
+4. Update agent configuration in `src/pipeline/`
+5. Test with the web interface in `src/ui/`
 
 ### Building the UI
 ```bash
